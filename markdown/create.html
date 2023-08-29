@@ -1,0 +1,142 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Markdown编辑</title>
+    <link rel="stylesheet" href="/assets/css/bytemd.css" />
+    <link rel="stylesheet" href="/assets/css/github-markdown.css" />
+    <script src="/assets/js/bytemd.umd.js"></script>
+    <script src="/assets/js/bytemd-plugin-gfm.js"></script>
+    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
+    <link rel="stylesheet" href="/assets/css/my.css" />
+    <script src="/assets/js/jquery.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+    <script src="/assets/js/vue.global.js"></script>
+    <script src="/assets/js/axios.min.js"></script>
+    <script src="/assets/js/bootbox.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/dayjs.min.js"></script>
+</head>
+
+<body>
+    <ol class="breadcrumb">
+        <li id="classify"><a href="/">首页</a></li>
+        <li class="active" id="title">新建文档</li>
+    </ol>
+    <div id="app"></div>
+    <template id="template">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label for="title" class="col-sm-2 control-label">标题</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
+                </div>
+                <div class="col-sm-3">
+                    <select class="form-control" v-model="classify" placeholder="分类">
+                        <option v-for="item in classifyList">{{item}}</option>
+                    </select>
+
+                </div>
+                <div class="col-sm-3">
+                    <button class="btn btn-primary btn-sm" @click="addClassify()">新增分类</button>
+                </div>
+            </div>
+        </div>
+        <div id="markdown" style="height: auto;"></div>
+        <div style="margin: 20px auto;text-align: center;">
+            <button class="btn btn-primary btn-sm" @click="createMarkdown">提交</button>
+        </div>
+    </template>
+    <script>
+        $(document).ready(function () {
+            axios.defaults.headers.common['proxy'] = "storage";
+            var vm = Vue.createApp({
+                data() {
+                    let list = []
+                    return {
+                        content: '',
+                        title: '',
+                        classify: '',
+                        classifyList: [],
+                    }
+                },
+                template: '#template',
+                async mounted() {
+                    this.getClassifyList()
+                    var plugins = [bytemdPluginGfm()];
+                    var editor = new bytemd.Editor({
+                        target: document.getElementById("markdown"),
+                        props: {
+                            value: "",
+                            uploadImages: async (file) => {
+                                return uploadFile(file)
+                            }
+                        },
+                        plugins: plugins,
+
+                    });
+                    editor.$on('change', (e) => {
+                        this.content = e.detail.value
+                        editor.$set({ value: e.detail.value });
+                    });
+                },
+                methods: {
+                    async getClassifyList() {
+                        let result = await axios.post('/distinct/markdown', {
+                            "distinct": ['classify']
+                        })
+                        this.classifyList = result.data.data
+                    },
+                    async addClassify() {
+                        bootbox.prompt("请输入分类", (result) => {
+                            if (result == null) {
+                                return true
+                            }
+                            if (result.length < 1) {
+                                return false
+                            }
+                            this.classifyList.push(result)
+                            this.classify = result
+                        })
+                    },
+                    async createMarkdown() {
+                        let data = {
+                            title: this.title,
+                            content: this.content,
+                            classify: this.classify,
+                        }
+                        if (this.title.trim().length < 1) {
+                            bootbox.alert('请输入标题')
+                            return
+                        }
+                        if (this.classify.trim().length < 1) {
+                            bootbox.alert('请选择分类')
+                            return
+                        }
+                        console.log(data)
+                        let result = await axios.post('/insert/markdown', [data])
+                        if (result.data.code != 0) {
+                            bootbox.alert(result.data.message)
+                            return
+                        }
+                        jump('/markdown/list.html', {
+                            'classify': this.classify,
+                        })
+
+                    }
+                }
+            })
+            vm.mount('#app')
+        })
+
+    </script>
+</body>
+<style>
+    .bytemd {
+        height: calc(100vh - 120px);
+    }
+</style>
+
+</html>
