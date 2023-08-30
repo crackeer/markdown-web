@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Markdown编辑</title>
+    <title>创建</title>
     <link rel="stylesheet" href="/assets/bytemd/bytemd.css" />
     <link rel="stylesheet" href="/assets/bytemd/github-markdown.css" />
     <link rel="stylesheet" href="/assets/bytemd/highlight.css" />
@@ -26,7 +26,6 @@
 <body>
     <ol class="breadcrumb">
         <li id="classify"><a href="/">首页</a></li>
-        <li class="active" id="title">新建文档</li>
     </ol>
     <div id="app"></div>
     <template id="template">
@@ -80,8 +79,6 @@
                                 bytemdPluginGfm(), bytemdPluginHighlight()
                             ],
                         },
-
-
                     });
                     editor.$on('change', (e) => {
                         this.content = e.detail.value
@@ -121,7 +118,6 @@
                             bootbox.alert('请选择分类')
                             return
                         }
-                        console.log(data)
                         let result = await axios.post('/insert/markdown', [data])
                         if (result.data.code != 0) {
                             bootbox.alert(result.data.message)
