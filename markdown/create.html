@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Markdown编辑</title>
-    <link rel="stylesheet" href="/assets/css/bytemd.css" />
-    <link rel="stylesheet" href="/assets/css/github-markdown.css" />
-    <script src="/assets/js/bytemd.umd.js"></script>
-    <script src="/assets/js/bytemd-plugin-gfm.js"></script>
+    <link rel="stylesheet" href="/assets/bytemd/bytemd.css" />
+    <link rel="stylesheet" href="/assets/bytemd/github-markdown.css" />
+    <link rel="stylesheet" href="/assets/bytemd/highlight.css" />
+
+    <script src="/assets/bytemd/bytemd.umd.js"></script>
+    <script src="/assets/bytemd/bytemd-plugin-gfm.js"></script>
+    <script src="/assets/bytemd/plugin-highlight.js"></script>
     <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
     <link rel="stylesheet" href="/assets/css/my.css" />
     <script src="/assets/js/jquery.js"></script>
@@ -72,9 +75,12 @@
                             value: "",
                             uploadImages: async (file) => {
                                 return uploadFile(file)
-                            }
+                            },
+                            plugins: [
+                                bytemdPluginGfm(), bytemdPluginHighlight()
+                            ],
                         },
-                        plugins: plugins,
+
 
                     });
                     editor.$on('change', (e) => {
@@ -121,7 +127,7 @@
                             bootbox.alert(result.data.message)
                             return
                         }
-                        jump('/markdown/list.html', {
+                        jump('/', {
                             'classify': this.classify,
                         })
 

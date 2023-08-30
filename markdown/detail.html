@@ -5,30 +5,29 @@
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Markdown详情</title>
-    <link rel="stylesheet" href="/assets/css/bytemd.css" />
-    <link rel="stylesheet" href="/assets/css/github-markdown.css" />
-    <script src="/assets/js/bytemd.umd.js"></script>
-    <script src="/assets/js/bytemd-plugin-gfm.js"></script>
+    <link rel="stylesheet" href="/assets/bytemd/bytemd.css" />
+    <link rel="stylesheet" href="/assets/bytemd/github-markdown.css" />
+    <link rel="stylesheet" href="/assets/bytemd/highlight.css" />
+    <script src="/assets/bytemd/bytemd.umd.js"></script>
+    <script src="/assets/bytemd/bytemd-plugin-gfm.js"></script>
+    <script src="/assets/bytemd/plugin-highlight.js"></script>
     <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
     <link rel="stylesheet" href="/assets/css/my.css" />
     <script src="/assets/js/jquery.js"></script>
     <script src="/assets/js/bootstrap.min.js"></script>
     <script src="/assets/js/util.js"></script>
     <script src="/assets/js/axios.min.js"></script>
-
-
 </head>
 
 <body>
     <ol class="breadcrumb">
-      <li id="classify"><a href="/">首页</a></li>
-      <li class="active" id="title"></li>
+        <li id="classify"><a href="/">首页</a></li>
+        <li class="active" id="title"></li>
     </ol>
-    <div id="markdown" style="height: auto;"></div>
+    <div id="markdown"></div>
 
     <script>
         axios.defaults.headers.common['proxy'] = "storage";
-        var plugins = [bytemdPluginGfm()];
         var getMarkdown = async () => {
             let id = getQuery("id", 0)
             let result = await axios.post('/select/markdown', {
@@ -49,24 +48,16 @@
             new bytemd.Viewer({
                 target: document.getElementById("markdown"),
                 props: {
-                    value: content
+                    value: content,
+                    plugins: [
+                        bytemdPluginGfm(), bytemdPluginHighlight()
+                    ]
                 },
-                plugins: plugins
             });
         }
         getMarkdown()
 
     </script>
 </body>
-<style>
-    .markdown-body img {
-        display: block;
-        margin: 10px auto;
-        border-style: groove;
-        border: 1px solid gray;
-        width: 60%;
-        height: 60%;
-    }
-</style>
 
 </html>
