@@ -87,9 +87,7 @@
                 },
                 methods: {
                     async getClassifyList() {
-                        let result = await axios.post('/distinct/markdown', {
-                            "distinct": ['classify']
-                        })
+                        let result = await axios.get('/category')
                         this.classifyList = result.data.data
                     },
                     async addClassify() {
@@ -118,7 +116,7 @@
                             bootbox.alert('请选择分类')
                             return
                         }
-                        let result = await axios.post('/insert/markdown', [data])
+                        let result = await axios.post('/create/markdown', data)
                         if (result.data.code != 0) {
                             bootbox.alert(result.data.message)
                             return

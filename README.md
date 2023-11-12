@@ -1,12 +1,16 @@
 
-# XCaddy编译
+# 介绍
 
-```sh
-xcaddy build master --with github.com/crackeer/caddy-database --with github.com/crackeer/caddy-upload2dir
-```
 
-# Run
+# SQL
 
-```sh
-./caddy start --config=./assets/caddy.json
+```sql
+CREATE TABLE markdown(
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   title           TEXT    NOT NULL,
+   content        TEXT    NOT NULL,
+   category           TEXT     NOT NULL,
+   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```

@@ -21,11 +21,11 @@
     <template id="template">
         <div style="padding: 1px 0 20px;">
             <label class="radio-inline">
-                <input type="radio" name="classify" value="_all_" v-model="classify"
-                    @change="selectClassify('_all_')">全部
+                <input type="radio" name="category" value="all" v-model="category"
+                    @change="selectClassify('all')">全部
             </label>
-            <label class="radio-inline" v-for="(item, i) in classifyList">
-                <input type="radio" name="classify" :value="item" v-model="classify"
+            <label class="radio-inline" v-for="(item, i) in categoryList">
+                <input type="radio" name="category" :value="item" v-model="category"
                     @change="selectClassify(item)">{{item}}
             </label>
             <a class="btn btn-link" href="/markdown/create.html">
@@ -49,71 +49,40 @@
                     <td style="text-align:center;"><a href="javascript:;" @click="showDeleteModal(item)">删除</a></td>
                 </tr>
         </table>
-        <div style="text-align: center;">
-            <div style="margin: 10px auto;">
-                <button type="button" class="btn btn-link" v-if="page > 1" @click="prev()">上一页</button>
-                <span style="font-size: 16px;">第{{page}}页 </span>
-                <button type="button" class="btn btn-link" @click="next()" v-if="list.length >= pageSize">下一页</button>
-            </div>
-        </div>
     </template>
     <script>
         const PAGE_SIZE = 20
         $(document).ready(function () {
-            axios.defaults.headers.common['proxy'] = "storage";
             var vm = Vue.createApp({
                 data() {
                     return {
-                        classify: '',
-                        classifyList: [],
-                        pageSize: PAGE_SIZE,
-                        page: 1,
+                        category: '',
+                        categoryList: [],
                         list: [],
                     }
                 },
                 template: '#template',
                 async mounted() {
-                    this.classify = getQuery('classify', '_all_')
-                    this.page = parseInt(getQuery('page', '1'))
-                    this.getClassifyList()
+                    this.category = getQuery('category', 'all')
+                    this.getCategoryList()
                     this.getList()
                 },
                 methods: {
-                    async next() {
-                        reloadWith({
-                            classify: this.classify,
-                            page: this.page + 1,
-                        })
-                    },
-                    async prev() {
-                        reloadWith({
-                            classify: this.classify,
-                            page: this.page - 1,
-                        })
-                    },
-                    async getClassifyList() {
-                        let result = await axios.post('/distinct/markdown', {
-                            "distinct": ['classify']
-                        })
-                        this.classifyList = result.data.data
+                    async getCategoryList() {
+                        let result = await axios.get('/category')
+                        this.categoryList = result.data.data
                     },
                     async getList() {
-                        let query = {}
-                        if (this.classify.length > 0 && this.classify != '_all_') {
-                            query['classify'] = this.classify
+                        let url = "/query/markdown"
+                        if (this.category.length > 0 && this.category != 'all') {
+                            url = url + "?category=" + this.category
                         }
-                        let result = await axios.post('/select/markdown', {
-                            query: query,
-                            'offset': (this.page - 1) * PAGE_SIZE,
-                            'order_by' : 'id desc',
-                            'limit': PAGE_SIZE,
-                        })
+                        let result = await axios.get(url)
                         this.list = result.data.data
                     },
-                    async selectClassify(classify) {
+                    async selectClassify(category) {
                         reloadWith({
-                            classify: classify,
-                            page: 1,
+                            category: category,
                         })
                     },
                     async showDeleteModal(item) {
@@ -124,11 +93,7 @@
                         })
                     },
                     async doDeleteMarkdown(id) {
-                        let result = await axios.post('/delete/markdown', {
-                            'query': {
-                                'id': id
-                            }
-                        })
+                        let result = await axios.post('/delete/markdown/' + id)
                         if (result.data.code < 0) {
                             bootbox.alert(result.data.message)
                         } else {

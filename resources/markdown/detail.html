@@ -30,11 +30,7 @@
         axios.defaults.headers.common['proxy'] = "storage";
         var getMarkdown = async () => {
             let id = getQuery("id", 0)
-            let result = await axios.post('/select/markdown', {
-                query: {
-                    id: id,
-                }
-            })
+            let result = await axios.get('/query/markdown?id=' + id)
             if (result.data.data.length < 1) {
                 return
             }

@@ -55,7 +55,6 @@
     </template>
     <script>
         $(document).ready(function () {
-            axios.defaults.headers.common['proxy'] = "storage";
             var vm = Vue.createApp({
                 data() {
                     let list = []
@@ -75,9 +74,7 @@
                 },
                 methods: {
                     async getClassifyList() {
-                        let result = await axios.post('/distinct/markdown', {
-                            "distinct": ['classify']
-                        })
+                        let result = await axios.get('/category')
                         this.classifyList = result.data.data
                     },
                     async addClassify() {
@@ -93,11 +90,7 @@
                         })
                     },
                     async getMarkdown() {
-                        let result = await axios.post('/select/markdown', {
-                            query: {
-                                id: this.id,
-                            }
-                        })
+                        let result = await axios.get('/query/markdown?id=' + this.id)
                         if (result.data.data.length < 1) {
                             return
                         }
@@ -136,12 +129,7 @@
                             bootbox.alert('请选择分类')
                             return
                         }
-                        let result = await axios.post('/update/markdown', {
-                            'query': {
-                                id: this.id
-                            },
-                            'update': data
-                        })
+                        let result = await axios.post('/modify/markdown/' + this.id, data)
                         if (result.data.code != 0) {
                             bootbox.alert(result.data.message)
                             return
