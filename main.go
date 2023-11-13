@@ -40,10 +40,10 @@ func main() {
 	router := gin.New()
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
-	router.POST("/delete/markdown/:id", ginHelper.DoResponseJSON(), deleteData)
-	router.POST("/create/markdown", ginHelper.DoResponseJSON(), createData)
-	router.POST("/modify/markdown/:id", ginHelper.DoResponseJSON(), modifyData)
-	router.GET("/query/markdown", ginHelper.DoResponseJSON(), queryData)
+	router.POST("/delete/:table/:id", ginHelper.DoResponseJSON(), deleteData)
+	router.POST("/create/:table", ginHelper.DoResponseJSON(), createData)
+	router.POST("/modify/:table/:id", ginHelper.DoResponseJSON(), modifyData)
+	router.GET("/query/:table", ginHelper.DoResponseJSON(), queryData)
 	router.GET("/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, cfg.Category)
 	})
@@ -78,6 +78,10 @@ func createStaticHandler(fs http.FileSystem) gin.HandlerFunc {
 	}
 }
 
+func getTable(ctx *gin.Context) string {
+	return ctx.Param("table")
+}
+
 func getDataID(ctx *gin.Context) int64 {
 	id := ctx.Param("id")
 	value, _ := strconv.Atoi(id)
@@ -97,12 +101,25 @@ func (Markdown) TableName() string {
 	return "markdown"
 }
 
+type Bookmark struct {
+	ID       int64     `json:"id"`
+	Title    string    `json:"title"`
+	Link     string    `json:"link"`
+	Category string    `json:"category"`
+	CreateAt time.Time `json:"create_at"`
+	ModifyAt time.Time `json:"modify_at"`
+}
+
+func (Bookmark) TableName() string {
+	return "bookmark"
+}
+
 func deleteData(ctx *gin.Context) {
 	if dataID := getDataID(ctx); dataID < 1 {
 		ginHelper.Failure(ctx, -1, "data id = 0")
 		return
 	}
-	result := globalDB.Exec(fmt.Sprintf("DELETE FROM markdown where id = %d", getDataID(ctx)))
+	result := globalDB.Exec(fmt.Sprintf("DELETE FROM %s where id = %d", getTable(ctx), getDataID(ctx)))
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
 	} else {
@@ -113,17 +130,43 @@ func deleteData(ctx *gin.Context) {
 }
 
 func createData(ctx *gin.Context) {
-	data := &Markdown{}
-	if err := ctx.ShouldBindJSON(data); err != nil {
+	var (
+		table string = getTable(ctx)
+		err   error
+		value interface{}
+	)
+	switch table {
+	case "markdown":
+		value, err = bindMarkdown(ctx)
+	case "bookmark":
+		value, err = bindBookmark(ctx)
+	}
+	if err != nil {
 		ginHelper.Failure(ctx, -1, err.Error())
 		return
 	}
-	result := globalDB.Create(data)
+	result := globalDB.Create(value)
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
 	} else {
-		ginHelper.Success(ctx, data)
+		ginHelper.Success(ctx, value)
 	}
+}
+
+func bindMarkdown(ctx *gin.Context) (*Markdown, error) {
+	data := &Markdown{}
+	if err := ctx.ShouldBindJSON(data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func bindBookmark(ctx *gin.Context) (*Bookmark, error) {
+	data := &Bookmark{}
+	if err := ctx.ShouldBindJSON(data); err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func modifyData(ctx *gin.Context) {
@@ -132,7 +175,7 @@ func modifyData(ctx *gin.Context) {
 		return
 	}
 	updateData := ginHelper.AllPostParams(ctx)
-	result := globalDB.Model(&Markdown{}).Where(map[string]interface{}{"id": getDataID(ctx)}).Updates(updateData)
+	result := globalDB.Table(getTable(ctx)).Where(map[string]interface{}{"id": getDataID(ctx)}).Updates(updateData)
 	if result.Error != nil {
 		ginHelper.Failure(ctx, -1, result.Error.Error())
 	} else {
@@ -148,6 +191,6 @@ func queryData(ctx *gin.Context) {
 	)
 	query := ginHelper.AllGetParams(ctx)
 
-	globalDB.Model(&Markdown{}).Where(query).Order("id desc").Find(&list)
+	globalDB.Table(getTable(ctx)).Where(query).Order("id desc").Find(&list)
 	ginHelper.Success(ctx, list)
 }

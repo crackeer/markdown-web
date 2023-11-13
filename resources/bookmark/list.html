@@ -1,0 +1,185 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>书签</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
+    <link rel="stylesheet" href="/assets/css/my.css" />
+    <script src="/assets/js/jquery.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+    <script src="/assets/js/vue.global.js"></script>
+    <script src="/assets/js/axios.min.js"></script>
+    <script src="/assets/js/bootbox.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/header.js"></script>
+</head>
+
+<body>
+    <div id="app"></div>
+    <template id="template">
+        <div style="padding: 1px 0 20px;">
+            <button class="btn btn-primary" @click="showCreateModel()">新建</button>
+        </div>
+        <template v-for="item in list">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="font-size: 18px;">
+                    <strong>{{item.category}}</strong>
+                </div>
+                <div class="panel-body">
+                    <template v-for="item2 in item.list">
+                        <a :href="item2.link" target="_blank" class="btn">
+                            {{item2.title}}
+                        </a>
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </template>
+                </div>
+            </div>
+        </template>
+        <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">{{ this.edit ? '修改' : '新建'}}书签</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label for="name" class="control-label col-sm-2">名字</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" v-model="title" placeholder="书签名字">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="service" class="control-label col-sm-2">链接</label>
+                                <div class="col-sm-9">
+                                    <textarea class="form-control" v-model="link" placeholder="链接" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="env" class="control-label col-sm-2">分类</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" v-model="category">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" @click="doUpdateBookmark()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </template>
+    <script>
+        $(document).ready(function () {
+            var vm = Vue.createApp({
+                data() {
+                    return {
+                        mode : '',
+                        edit: false,
+                        bookmark_id: 0,
+                        title: 'Edit',
+                        link: '',
+                        category: '',
+                        list: [],
+                    }
+                },
+                template: '#template',
+                async mounted() {
+                    this.getCategoryList()
+                    this.getList()
+                },
+                methods: {
+                    async getCategoryList() {
+                        let result = await axios.get('/category')
+                        this.categoryList = result.data.data
+                    },
+                    async getList() {
+                        let url = "/query/bookmark"
+                        let result = await axios.get(url)
+                        let list = result.data.data
+                        let groupBookmark = {}
+                        for (var i in list) {
+                            if (groupBookmark[list[i].category] == undefined) {
+                                groupBookmark[list[i].category] = []
+                            }
+                            groupBookmark[list[i].category].push(list[i])
+                        }
+                        let groupBookmarkList = []
+                        let categorys = Object.keys(groupBookmark);
+                        for (var i in categorys) {
+                            groupBookmarkList.push({
+                                'category': categorys[i],
+                                'list': groupBookmark[categorys[i]],
+                            })
+                        }
+                        console.log(groupBookmarkList)
+                        this.list = groupBookmarkList
+                    },
+                    async showCreateModel() {
+                        this.title = ''
+                        this.link = ''
+                        this.category = ''
+                        this.edit = false
+                        $('#myModal').modal()
+                    },
+                    async showDeleteModal(item) {
+                        bootbox.confirm("确认删除`" + item.title + "`？", (result) => {
+                            if (result) {
+                                this.doDelete(item.id)
+                            }
+                        })
+                    },
+                    async doDelete(id) {
+                        let result = await axios.post('/delete/bookmark/' + id)
+                        if (result.data.code < 0) {
+                            bootbox.alert(result.data.message)
+                        } else {
+                            simpleReload()
+                        }
+                    },
+                    async doUpdateBookmark() {
+                        if (this.edit) {
+                            let updateData = {
+                                'title': this.title,
+                                'link': this.link,
+                                'category': this.category,
+                            }
+
+                            let result = await axios.post('/modify/bookmark/' + this.bookmark_id, updateData)
+                            if (result.data.code < 0) {
+                                alert(result.data.message)
+                            }
+                        } else {
+                            let insertData = {
+                                'title': this.title,
+                                'link': this.link,
+                                'category': this.category,
+                            }
+                            let result = await axios.post('/create/bookmark', insertData)
+                            if (result.data.code < 0) {
+                                alert(result.data.message)
+                            }
+                        }
+                        simpleReload()
+                    }
+                }
+            })
+            vm.mount('#app')
+        })
+
+    </script>
+</body>
+<style>
+    .bytemd {
+        height: calc(100vh - 120px);
+    }
+</style>
+
+</html>

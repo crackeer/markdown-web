@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Js代码运行</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
+    <link rel="stylesheet" href="/assets/css/my.css" />
+    <script src="/assets/js/jquery.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/filereader.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+    <script src="/assets/js/bootbox.min.js"></script>
+    <script src="/assets/monaco-editor/min/vs/loader.js"></script>
+    <script src="/header.js"></script>
+
+<body>
+    <div  class="form-inline">
+       
+        <h2>新建代码：<input type="text" class="form-control" placeholder="输入标题" style="width: 38%;">
+            <input class="btn btn-primary" type="button" value="保存" id="handle" /></h2>
+        <hr />
+        <div id="container" style="height: 600px; border: 1px solid grey"></div>
+    </div>
+
+    <script>
+        var initJsCode = `function handle(input){
+    return input
+}`
+        var jsCodeEditor = null;
+        require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
+
+        require(['vs/editor/editor.main'], function () {
+            jsCodeEditor = monaco.editor.create(document.getElementById('container'), {
+                value: initJsCode,
+                language: 'javascript',
+                theme: "vs-dark",
+            });
+        });
+        const container = document.getElementById("jsoneditor")
+        function getInitJSON() {
+            try {
+                let
+                    value = localStorage.getItem("json-editor-js-code") || '{}'
+                return JSON.parse(value)
+            } catch (e) {
+                return
+                { }
+            }
+        }
+        const options = {
+            "mode": "code",
+            "search": true,
+            "indentation": 4,
+            "onChangeText": (json) => {
+                try {
+                    JSON.parse(json)
+                    localStorage.setItem("json-editor-js-code", json)
+                } catch (e) {
+
+                }
+            }
+        }
+        const editor = new JSONEditor(container, options, getInitJSON())
+        const updatedJson = editor.get()
+        $('#handle').click(() => {
+            let jsCode = jsCodeEditor.getValue()
+            eval(jsCode)
+            let result = handle(editor.get())
+            $('#result').val(JSON.stringify(result))
+        })
+    </script>
+</body>
+
+</html>
