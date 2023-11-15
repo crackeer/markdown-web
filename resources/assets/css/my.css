@@ -42,3 +42,7 @@ textarea {
 .bold {
     font-weight: bold;;
 }
+
+.bytemd {
+    height: calc(100vh - 200px) !important;
+}

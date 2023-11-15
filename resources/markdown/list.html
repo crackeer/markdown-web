@@ -4,15 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Markdown编辑</title>
-    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
-    <link rel="stylesheet" href="/assets/css/my.css" />
-    <script src="/assets/js/jquery.js"></script>
-    <script src="/assets/js/bootstrap.min.js"></script>
-    <script src="/assets/js/vue.global.js"></script>
-    <script src="/assets/js/axios.min.js"></script>
-    <script src="/assets/js/bootbox.min.js"></script>
-    <script src="/assets/js/util.js"></script>
+    <title>文档列表</title>
+   
     <script src="/header.js"></script>
 </head>
 
@@ -51,8 +44,7 @@
         </table>
     </template>
     <script>
-        const PAGE_SIZE = 20
-        $(document).ready(function () {
+        var startWork = function () {
             var vm = Vue.createApp({
                 data() {
                     return {
@@ -103,7 +95,7 @@
                 }
             })
             vm.mount('#app')
-        })
+        }
 
     </script>
 </body>
