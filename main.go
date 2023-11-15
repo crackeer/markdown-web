@@ -44,6 +44,7 @@ func main() {
 	router.POST("/create/:table", ginHelper.DoResponseJSON(), createData)
 	router.POST("/modify/:table/:id", ginHelper.DoResponseJSON(), modifyData)
 	router.GET("/query/:table", ginHelper.DoResponseJSON(), queryData)
+	router.GET("/distinct/:table/:colum", ginHelper.DoResponseJSON(), distinctData)
 	router.GET("/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, cfg.Category)
 	})
@@ -80,6 +81,10 @@ func createStaticHandler(fs http.FileSystem) gin.HandlerFunc {
 
 func getTable(ctx *gin.Context) string {
 	return ctx.Param("table")
+}
+
+func getColum(ctx *gin.Context) string {
+	return ctx.Param("colum")
 }
 
 func getDataID(ctx *gin.Context) int64 {
@@ -192,5 +197,16 @@ func queryData(ctx *gin.Context) {
 	query := ginHelper.AllGetParams(ctx)
 
 	globalDB.Table(getTable(ctx)).Where(query).Order("id desc").Find(&list)
+	ginHelper.Success(ctx, list)
+}
+
+func distinctData(ctx *gin.Context) {
+	var (
+		list []interface{}
+	)
+	query := ginHelper.AllGetParams(ctx)
+	colum := getColum(ctx)
+
+	globalDB.Table(getTable(ctx)).Where(query).Distinct(colum).Find(&list)
 	ginHelper.Success(ctx, list)
 }

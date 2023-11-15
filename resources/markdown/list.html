@@ -37,14 +37,14 @@
                 <tr>
                     <th>ID</th>
                     <th>标题</th>
-                    <th>标签</th>
+                    <th>分类</th>
                     <th colspan="2" style="text-align:center;">操作</th>
                 </tr>
             <tbody>
                 <tr v-for="(item, i) in list">
                     <td>{{item.id}}</td>
                     <td><a :href="'/markdown/detail.html?id=' + item.id">{{item.title}}</a></td>
-                    <td>{{item.classify}}</td>
+                    <td>{{item.category}}</td>
                     <td style="text-align:center;"><a :href="'/markdown/edit.html?id=' + item.id">编辑</a></td>
                     <td style="text-align:center;"><a href="javascript:;" @click="showDeleteModal(item)">删除</a></td>
                 </tr>
@@ -69,7 +69,7 @@
                 },
                 methods: {
                     async getCategoryList() {
-                        let result = await axios.get('/category')
+                        let result = await axios.get('/distinct/markdown/category')
                         this.categoryList = result.data.data
                     },
                     async getList() {

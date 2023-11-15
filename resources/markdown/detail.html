@@ -13,6 +13,8 @@
     <script src="/assets/bytemd/plugin-highlight.js"></script>
     <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
     <link rel="stylesheet" href="/assets/css/my.css" />
+    <script src="/assets/js/vue.global.js"></script>
+    <script src="/assets/js/bootbox.min.js"></script>
     <script src="/assets/js/jquery.js"></script>
     <script src="/assets/js/bootstrap.min.js"></script>
     <script src="/assets/js/util.js"></script>
@@ -21,40 +23,59 @@
 </head>
 
 <body>
-    <ol class="breadcrumb">
-        <li id="classify"><a href="/">首页</a></li>
-        <li class="active" id="title"></li>
-    </ol>
-    <div id="markdown"></div>
+    <div id="app"></div>
+    <template id="template">
+        <div class="page-header">
+            <h3>{{this.title}} <small>（from:{{this.category}}）</small></h3>
+          </div>
+        <div id="markdown"></div>
+    </template>
 
     <script>
-        axios.defaults.headers.common['proxy'] = "storage";
-        var getMarkdown = async () => {
-            let id = getQuery("id", 0)
-            let result = await axios.get('/query/markdown?id=' + id)
-            if (result.data.data.length < 1) {
-                return
-            }
-            let content = result.data.data[0].content
-            let classify = '<a href="/?classify=' + result.data.data[0].classify + '">' + result.data.data[0].classify + '</a>'
-            let edit = '<a href="/markdown/edit.html?id=' + result.data.data[0].id + '"><span  class="glyphicon glyphicon-pencil"></span></a>'
-            $('#title').html(result.data.data[0].title)
-            $('#classify').html(classify)
-            $('.breadcrumb').append(edit)
-            document.title = result.data.data[0].title
-            new bytemd.Viewer({
-                target: document.getElementById("markdown"),
-                props: {
-                    value: content,
-                    plugins: [
-                        bytemdPluginGfm(), bytemdPluginHighlight()
-                    ]
+        $(document).ready(function () {
+            var vm = Vue.createApp({
+                data() {
+                    let list = []
+                    return {
+                        id: 0,
+                        content: '',
+                        title: '',
+                        classify: '',
+                    }
                 },
-            });
-        }
-        getMarkdown()
+                template: '#template',
+                async mounted() {
+                    this.id = getQuery('id', 0)
+                    this.getMarkdown()
+                },
+                methods: {
+
+                    async getMarkdown() {
+                        let result = await axios.get('/query/markdown?id=' + this.id)
+                        if (result.data.data.length < 1) {
+                            return
+                        }
+                        this.content = result.data.data[0].content
+                        this.title = result.data.data[0].title
+                        this.category = result.data.data[0].category
+                        document.title = result.data.data[0].title
+                        new bytemd.Viewer({
+                            target: document.getElementById("markdown"),
+                            props: {
+                                value: this.content,
+                                plugins: [
+                                    bytemdPluginGfm(), bytemdPluginHighlight()
+                                ]
+                            },
+                        });
+                    }
+                }
+            })
+            vm.mount('#app')
+        })
 
     </script>
+   
 </body>
 
 </html>

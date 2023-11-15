@@ -26,32 +26,32 @@
 </head>
 
 <body>
-    <ol class="breadcrumb">
-        <li id="classify"><a href="/">首页</a></li>
-        <li class="active" id="title">编辑</li>
-    </ol>
     <div id="app"></div>
     <template id="template">
         <div class="form-horizontal">
             <div class="form-group">
-                <label for="title" class="col-sm-2 control-label">标题</label>
-                <div class="col-sm-4">
+                <label for="title" class="col-sm-1 control-label">标题</label>
+                <div class="col-sm-9">
                     <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
                 </div>
-                <div class="col-sm-3">
-                    <select class="form-control" v-model="classify" placeholder="分类">
-                        <option v-for="item in classifyList">{{item}}</option>
-                    </select>
-
-                </div>
-                <div class="col-sm-3">
-                    <button class="btn btn-primary btn-sm" @click="addClassify()">新增分类</button>
+            </div>
+            <div class="form-group">
+                <label for="title" class="col-sm-1 control-label">分类</label>
+                <div class="col-sm-9">
+                    <label class="radio-inline" v-for="(item, i) in categoryList">
+                        <input type="radio" name="category" :value="item" v-model="category">{{item}}
+                    </label>
+                    <label class="radio-inline">
+                        <button class="btn btn-sm"  @click="addCategory()">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                        </button>
+                    </label>
                 </div>
             </div>
         </div>
         <div id="markdown" style="height: auto;"></div>
         <div style="margin: 20px auto;text-align: center;">
-            <button class="btn btn-primary btn-sm" @click="updateMarkdown">提交</button>
+            <button class="btn btn-primary" @click="updateMarkdown">提交</button>
         </div>
     </template>
     <script>
@@ -69,16 +69,16 @@
                 },
                 template: '#template',
                 async mounted() {
-                    this.getClassifyList()
+                    this.getCategoryList()
                     this.id = getQuery('id', 0)
                     this.getMarkdown()
                 },
                 methods: {
-                    async getClassifyList() {
-                        let result = await axios.get('/category')
-                        this.classifyList = result.data.data
+                    async getCategoryList() {
+                        let result = await axios.get('/distinct/markdown/category')
+                        this.categoryList = result.data.data || []
                     },
-                    async addClassify() {
+                    async addCategory() {
                         bootbox.prompt("请输入分类", (result) => {
                             if (result == null) {
                                 return true
@@ -86,8 +86,8 @@
                             if (result.length < 1) {
                                 return false
                             }
-                            this.classifyList.push(result)
-                            this.classify = result
+                            this.categoryList.push(result)
+                            this.category = result
                         })
                     },
                     async getMarkdown() {
@@ -97,7 +97,7 @@
                         }
                         this.content = result.data.data[0].content
                         this.title = result.data.data[0].title
-                        this.classify = result.data.data[0].classify
+                        this.category = result.data.data[0].category
                         var plugins = [bytemdPluginGfm()];
                         var editor = new bytemd.Editor({
                             target: document.getElementById("markdown"),
@@ -120,13 +120,13 @@
                         let data = {
                             title: this.title,
                             content: this.content,
-                            classify: this.classify,
+                            category: this.category,
                         }
                         if (this.title.trim().length < 1) {
                             bootbox.alert('请输入标题')
                             return
                         }
-                        if (this.classify.trim().length < 1) {
+                        if (this.category.trim().length < 1) {
                             bootbox.alert('请选择分类')
                             return
                         }

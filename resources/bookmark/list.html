@@ -23,7 +23,9 @@
             <template v-if="mode.length < 1">
                 <button class="btn btn-primary" @click="showCreateModel()" style="margin-right: 10px;">新建</button>
                 <button class="btn btn-warning" @click="setMode('edit')" style="margin-right: 10px;">编辑</button>
-                <button class="btn btn-danger" @click="setMode('delete')">删除</button>
+                <button class="btn btn-danger" @click="setMode('delete')" style="margin-right: 10px;">删除</button>
+                <button class="btn btn-info" @click="importBookmark">导入浏览器标签 <span class="glyphicon glyphicon-import"
+                        aria-hidden="true"></span></button>
             </template>
             <template v-else>
                 <button class="btn btn-info" @click="setMode('')">退出{{mode == 'edit' ? '编辑':'删除'}}模式</button>
@@ -33,8 +35,19 @@
 
         <template v-for="item in list">
             <div class="panel panel-default">
-                <div class="panel-heading" style="font-size: 18px;">
+                <div class="panel-heading" style="font-size: 16px;">
                     <strong>{{item.category}}</strong>
+                    <template v-if="mode == 'edit'">
+                        <a @click="showAddModal(item)" style="font-size: 14px; margin-left: 10px;">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                        </a>
+                    </template>
+
+                    <div style="float: right;" v-if="mode == 'delete'">
+                        <a type="button" class="btn btn-text btn-sm" @click="showBatchDeleteModal(item)">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                        </a>
+                    </div>
                 </div>
                 <div class="panel-body">
                     <template v-for="item2 in item.list" v-if="mode == 'edit'">
@@ -59,6 +72,36 @@
                 </div>
             </div>
         </template>
+        <div class="modal fade" tabindex="-1" role="dialog" id="myAddModal">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">添加书签到`{{category}}`</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <template v-for="item in list">
+                            <template v-if="item.category != category">
+                                <h3 style="font-size: 16px;">{{item.category}}</h3>
+                                <template v-for="item2 in item.list">
+                                    <label class="checkbox-inline" style="margin-bottom: 10px;">
+                                        <input type="checkbox" :value="item2.id" v-model="addIds"
+                                            name="addIds">{{item2.title}}
+                                    </label>
+                                </template>
+                            </template>
+                        </template>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" @click="doBatchUpdate()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
@@ -85,6 +128,12 @@
                                 <label for="env" class="control-label col-sm-2">分类</label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" v-model="category">
+                                    <template v-for="item in categoryList">
+                                        <label class="radio-inline">
+                                            <input type="radio" name="category" :value="item"
+                                                v-model="category">{{item}}
+                                        </label>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -110,16 +159,17 @@
                         link: '',
                         category: '',
                         list: [],
+                        categoryList: [],
+                        addIds: [],
                     }
                 },
                 template: '#template',
                 async mounted() {
-                    this.getCategoryList()
                     this.getList()
                 },
                 methods: {
                     async getCategoryList() {
-                        let result = await axios.get('/category')
+                        let result = await axios.get('/distinct/bookmark/category')
                         this.categoryList = result.data.data
                     },
                     async getList() {
@@ -143,6 +193,7 @@
                         }
                         console.log(groupBookmarkList)
                         this.list = groupBookmarkList
+                        this.getCategoryList()
                     },
                     async showCreateModel() {
                         this.title = ''
@@ -171,14 +222,57 @@
                         if (result.data.code < 0) {
                             bootbox.alert(result.data.message)
                         } else {
-                            bootbox.alert('删除成功', () => {
-                                this.getList()
-                            })
-
+                            this.getList()
                         }
+                    },
+                    showBatchDeleteModal(item) {
+                        bootbox.confirm("确认删除`" + item.category + "`分类下的所有书签？", async (result) => {
+                            if (!result) {
+                                return
+                            }
+                            for (var i = 0; i < item.list.length; i++) {
+                                await this.doDelete(item.list[i].id)
+                            }
+                        })
+                    },
+                    showAddModal(item) {
+                        this.category = item.category
+                        $('#myAddModal').modal('show')
+                    },
+                    async doBatchUpdate() {
+                        for (var i in this.addIds) {
+                            let result = await axios.post('/modify/bookmark/' + this.addIds[i], {
+                                'category': this.category,
+                            })
+                        }
+                        $('#myAddModal').modal('hide')
+                        this.getList()
                     },
                     setMode(mode) {
                         this.mode = mode
+                    },
+                    async importBookmark() {
+                        let result = await window.showOpenFilePicker();
+                        if (result.length < 1) {
+                            return
+                        }
+                        let content = await result[0].getFile();
+                        const buffer = await content.arrayBuffer();
+                        let decoder = new TextDecoder("utf-8");
+                        let htmlContent = decoder.decode(buffer)
+                        let firstFolder = $(htmlContent).find("a")
+                        for (let i = 0; i < firstFolder.length; i++) {
+                            let folder = firstFolder[i]
+                            if ($(folder).attr("href") != undefined) {
+                                let insertData = {
+                                    "link": $(folder).attr("href"),
+                                    "title": $(folder).text(),
+                                    'category': '浏览器导入',
+                                }
+                                await axios.post('/create/bookmark', insertData)
+                            }
+                        }
+
                     },
                     async doUpdateBookmark() {
                         if (this.edit) {
@@ -193,9 +287,7 @@
                                 bootbox.alert(result.data.message)
                             } else {
                                 $('#myModal').modal('hide')
-                                bootbox.alert('修改成功', () => {
-                                    this.getList()
-                                })
+                                this.getList()
                             }
 
                             return
