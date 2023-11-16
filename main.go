@@ -119,6 +119,19 @@ func (Bookmark) TableName() string {
 	return "bookmark"
 }
 
+type Code struct {
+	ID       int64     `json:"id"`
+	Title    string    `json:"title"`
+	Content  string    `json:"content"`
+	Language string    `json:"language"`
+	CreateAt time.Time `json:"create_at"`
+	ModifyAt time.Time `json:"modify_at"`
+}
+
+func (Code) TableName() string {
+	return "code"
+}
+
 func deleteData(ctx *gin.Context) {
 	if dataID := getDataID(ctx); dataID < 1 {
 		ginHelper.Failure(ctx, -1, "data id = 0")
@@ -145,6 +158,8 @@ func createData(ctx *gin.Context) {
 		value, err = bindMarkdown(ctx)
 	case "bookmark":
 		value, err = bindBookmark(ctx)
+	case "code":
+		value, err = bindCode(ctx)
 	}
 	if err != nil {
 		ginHelper.Failure(ctx, -1, err.Error())
@@ -156,6 +171,14 @@ func createData(ctx *gin.Context) {
 	} else {
 		ginHelper.Success(ctx, value)
 	}
+}
+
+func bindCode(ctx *gin.Context) (*Code, error) {
+	data := &Code{}
+	if err := ctx.ShouldBindJSON(data); err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func bindMarkdown(ctx *gin.Context) (*Markdown, error) {

@@ -14,9 +14,9 @@ var header = `
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li><a href="/markdown/list.html">文档</a></li>
-                <li><a href="/bookmark/list.html">书签</a></li>
-                <li><a href="/code/list.html">代码</a></li>
+                <li><a href="/markdown/list.html" id="markdown-a">文档</a></li>
+                <li><a href="/bookmark/list.html" id="bookmark-a">书签</a></li>
+                <li><a href="/code/list.html" id="code-a">代码</a></li>
             </ul>
         </div>
     </div>
@@ -29,6 +29,8 @@ var styleFiles = [
     "/assets/bytemd/bytemd.css",
     "/assets/bytemd/github-markdown.css",
     "/assets/bytemd/highlight.css",
+    "/assets/cherry-md/cherry-markdown.css",
+    "/assets/cherry-md/katex.min.css",
 ]
 var vipJsFiles = [
     "/assets/js/jquery.js",
@@ -37,12 +39,16 @@ var vipJsFiles = [
     "/assets/js/axios.min.js",
     "/assets/js/dayjs.min.js",
     "/assets/bytemd/bytemd.umd.js",
+    "/assets/cherry-md/cherry-markdown.js",
+    "/assets/cherry-md/echarts.js",
+    "/assets/cherry-md/pinyin_dist.js",
 ]
 var jsFiles = [
     "/assets/js/bootstrap.min.js",
     "/assets/js/bootbox.min.js",
     "/assets/bytemd/bytemd-plugin-gfm.js",
     "/assets/bytemd/plugin-highlight.js",
+    "/assets/cherry-md/config.js",
 ]
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -50,11 +56,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadJs(vipJsFiles)
     await sleep(200)
     await loadJs(jsFiles)
-    await sleep(300)
+    await sleep(100)
+    await loadJs(["/assets/monaco-editor/min/vs/loader.js"])
+    await sleep(100)
+    loadNavigation()
     startWork()
-    $('body').prepend(header)
-    $('a[href="' + window.location.pathname + '"]').parent().addClass('active')
+   
 }, false);
+
+function loadNavigation() {
+    $('body').prepend(header)
+    let parts = window.location.pathname.split('/')
+    console.log(parts[1])
+    $('a[id="' + parts[1] + '-a"]').parent().addClass('active')
+}
 /*
 $(document).ready(function () {
     $('body').prepend(header)

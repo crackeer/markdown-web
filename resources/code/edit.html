@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Js代码运行</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+    <script src="/header.js"></script>
+
+<body>
+    <div id="app"></div>
+    <template id="template">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label for="title" class="col-sm-1 control-label">标题</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
+                </div>
+                <div class="col-sm-2">
+                    <button class="btn btn-primary" @click="updateCode">更新</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="title" class="col-sm-1 control-label">语言</label>
+                <div class="col-sm-9">
+                    <label class="radio-inline" v-for="(item, i) in languageList">
+                        <input type="radio" name="language" :value="item" v-model="language">{{item}}
+                    </label>
+                    <label class="radio-inline">
+                        <button class="btn btn-sm" @click="addLanguage()">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                        </button>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div id="container" style="height: 600px;"></div>
+    </template>
+
+    <script>
+        var codeEditor = null;
+        var initCodeEditor = function (lang, value) {
+            require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
+
+            require(['vs/editor/editor.main'], function () {
+                codeEditor = monaco.editor.create(document.getElementById('container'), {
+                    value: value,
+                    language: lang,
+                    theme: "vs-dark",
+                });
+            });
+        }
+
+        var startWork = function () {
+            var vm = Vue.createApp({
+                data() {
+                    let list = []
+                    return {
+                        content: '',
+                        title: '',
+                        language: '',
+                        languageList: [],
+                    }
+                },
+                template: '#template',
+                async mounted() {
+                    await this.getLanguageList()
+                    this.id = getQuery('id', 0)
+                    this.getCode();
+                },
+                methods: {
+                    async getCode() {
+                        let result = await axios.get('/query/code?id=' + this.id)
+                        if (result.data.data.length < 1) {
+                            return
+                        }
+
+                        this.title = result.data.data[0].title
+                        this.language = result.data.data[0].language
+                        setTimeout(() => {
+                            initCodeEditor(this.language, result.data.data[0].content)
+                        }, 400)
+                    },
+                    async getLanguageList() {
+                        let result = await axios.get('/distinct/code/language')
+                        this.languageList = result.data.data || []
+                    },
+                    async addLanguage() {
+                        bootbox.prompt("请输入语言", (result) => {
+                            if (result == null) {
+                                return true
+                            }
+                            if (result.length < 1) {
+                                return false
+                            }
+                            this.languageList.push(result)
+                            this.language = result
+                        })
+                    },
+                    async updateCode() {
+                        let data = {
+                            title: this.title,
+                            content: codeEditor.getValue(),
+                            language: this.language,
+                        }
+                        console.log(data)
+                        if (data.title.trim().length < 1) {
+                            bootbox.alert('请输入标题')
+                            return
+                        }
+                        if (this.language.trim().length < 1) {
+                            bootbox.alert('请选择分类')
+                            return
+                        }
+                        let result = await axios.post('/modify/code/' + this.id, data)
+                        if (result.data.code != 0) {
+                            bootbox.alert(result.data.message)
+                            return
+                        }
+                        jump('/code/detail.html', {
+                            'id': this.id
+                        })
+
+                    }
+                }
+            })
+            vm.mount('#app')
+        }
+    </script>
+</body>
+
+</html>

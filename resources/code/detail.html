@@ -1,0 +1,71 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Code详情</title>
+    <script src="/header.js"></script>
+</head>
+
+<body>
+    <div id="app"></div>
+    <template id="template">
+        <div class="page-header">
+            <h3>{{this.title}} <small>语言:{{this.language}}）</small></h3>
+        </div>
+        <div id="container" style="height: 600px;"></div>
+    </template>
+
+    <script>
+        var codeEditor = null;
+        var initCodeEditor = function (lang, value) {
+            require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
+            require(['vs/editor/editor.main'], function () {
+                codeEditor = monaco.editor.create(document.getElementById('container'), {
+                    value: value,
+                    language: lang,
+                    theme: "vs-dark",
+                });
+            });
+        }
+        var startWork = function () {
+            var vm = Vue.createApp({
+                data() {
+                    let list = []
+                    return {
+                        id: 0,
+                        content: '',
+                        title: '',
+                        language: '',
+                    }
+                },
+                template: '#template',
+                async mounted() {
+                    this.id = getQuery('id', 0)
+                    this.getCode();
+                },
+                methods: {
+                    async getCode() {
+                        let result = await axios.get('/query/code?id=' + this.id)
+                        if (result.data.data.length < 1) {
+                            return
+                        }
+                      
+                        this.title = result.data.data[0].title
+                        this.language = result.data.data[0].language
+                        document.title = result.data.data[0].title
+                        setTimeout(() => {
+                            initCodeEditor( this.language ,  result.data.data[0].content)
+                        }, 200)
+                    }
+                }
+            })
+            vm.mount('#app')
+        }
+
+    </script>
+
+</body>
+
+</html>

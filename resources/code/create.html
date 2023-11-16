@@ -8,71 +8,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>Js代码运行</title>
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" href="/assets/css/bootstrap3.4.min.css" />
-    <link rel="stylesheet" href="/assets/css/my.css" />
-    <script src="/assets/js/jquery.js"></script>
-    <script src="/assets/js/util.js"></script>
-    <script src="/assets/js/filereader.js"></script>
-    <script src="/assets/js/bootstrap.min.js"></script>
-    <script src="/assets/js/bootbox.min.js"></script>
-    <script src="/assets/monaco-editor/min/vs/loader.js"></script>
+
     <script src="/header.js"></script>
 
 <body>
-    <div  class="form-inline">
-        <h2>新建代码：<input type="text" class="form-control" placeholder="输入标题" style="width: 38%;">
-            <input class="btn btn-primary" type="button" value="保存" id="handle" />
-        </h2>
-        <hr />
+    <div id="app"></div>
+    <template id="template">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label for="title" class="col-sm-1 control-label">标题</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
+                </div>
+                <div class="col-sm-2">
+                    <button class="btn btn-primary" @click="createCode">创建</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="title" class="col-sm-1 control-label">语言</label>
+                <div class="col-sm-9">
+                    <label class="radio-inline" v-for="(item, i) in languageList">
+                        <input type="radio" name="language" :value="item" v-model="language">{{item}}
+                    </label>
+                    <label class="radio-inline">
+                        <button class="btn btn-sm" @click="addLanguage()">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                        </button>
+                    </label>
+                </div>
+            </div>
+        </div>
         <div id="container" style="height: 600px; border: 1px solid grey"></div>
-    </div>
+    </template>
 
     <script>
-        var initJsCode = `function handle(input){
-    return input
-}`
-        var jsCodeEditor = null;
-        require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
+        var codeEditor = null;
+        var initCodeEditor = function (lang, value) {
+            require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
 
-        require(['vs/editor/editor.main'], function () {
-            jsCodeEditor = monaco.editor.create(document.getElementById('container'), {
-                value: initJsCode,
-                language: 'javascript',
-                theme: "vs-dark",
+            require(['vs/editor/editor.main'], function () {
+                codeEditor = monaco.editor.create(document.getElementById('container'), {
+                    value: value,
+                    language: lang,
+                    theme: "vs-dark",
+                });
             });
-        });
-        const container = document.getElementById("jsoneditor")
-        function getInitJSON() {
-            try {
-                let
-                    value = localStorage.getItem("json-editor-js-code") || '{}'
-                return JSON.parse(value)
-            } catch (e) {
-                return
-                { }
-            }
         }
-        const options = {
-            "mode": "code",
-            "search": true,
-            "indentation": 4,
-            "onChangeText": (json) => {
-                try {
-                    JSON.parse(json)
-                    localStorage.setItem("json-editor-js-code", json)
-                } catch (e) {
 
+        var startWork = function () {
+            var vm = Vue.createApp({
+                data() {
+                    let list = []
+                    return {
+                        content: '',
+                        title: '',
+                        language: '',
+                        languageList: [],
+                    }
+                },
+                template: '#template',
+                async mounted() {
+                    await this.getLanguageList()
+                    setTimeout(() => {
+                        initCodeEditor("go", "")
+                    }, 400)
+                },
+                methods: {
+                    async getLanguageList() {
+                        let result = await axios.get('/distinct/code/language')
+                        this.languageList = result.data.data || []
+                    },
+                    async addLanguage() {
+                        bootbox.prompt("请输入语言", (result) => {
+                            if (result == null) {
+                                return true
+                            }
+                            if (result.length < 1) {
+                                return false
+                            }
+                            this.languageList.push(result)
+                            this.language = result
+                        })
+                    },
+                    async createCode() {
+                        let data = {
+                            title: this.title,
+                            content: codeEditor.getValue(),
+                            language: this.language,
+                        }
+                        console.log(data)
+                        if (data.title.trim().length < 1) {
+                            bootbox.alert('请输入标题')
+                            return
+                        }
+                        if (this.language.trim().length < 1) {
+                            bootbox.alert('请选择分类')
+                            return
+                        }
+                        let result = await axios.post('/create/code', data)
+                        if (result.data.code != 0) {
+                            bootbox.alert(result.data.message)
+                            return
+                        }
+                        jump('/code/detail.html', {
+                            'id': result.data.data.id,
+                        })
+
+                    }
                 }
-            }
+            })
+            vm.mount('#app')
         }
-        const editor = new JSONEditor(container, options, getInitJSON())
-        const updatedJson = editor.get()
-        $('#handle').click(() => {
-            let jsCode = jsCodeEditor.getValue()
-            eval(jsCode)
-            let result = handle(editor.get())
-            $('#result').val(JSON.stringify(result))
-        })
     </script>
 </body>
 

@@ -129,5 +129,50 @@ function readFiles(file) {
         }
         reader.readAsDataURL(file);
     }
+}
+
+function getEditorType() {
+    return localStorage.getItem('editor-type')
+}
+
+function setEditorType(editorType) {
+    return localStorage.setItem('editor-type', editorType)
+}
+
+
+function initMarkdownEditor(target, value) {
+    let editorType = getEditorType();
+    if (editorType == "cherry") {
+        initCherryMarkdownEditor(target, value);
+        return
+    }
     
+    initByteMarkdownEditor(target, value);
+}
+function initCherryMarkdownEditor(target, value) {
+    var config = Object.assign({}, basicConfig, { value: value, id, target });
+    window.cherryEditor = new Cherry(config);
+}
+function initByteMarkdownEditor(target, value) {
+    window.byteEditor = new bytemd.Editor({
+        target: document.getElementById(target),
+        props: {
+            value: value,
+            plugins: [
+                bytemdPluginGfm(), bytemdPluginHighlight()
+            ],
+        },
+    });
+    window.byteEditor.$on('change', (e) => {
+        window.byteEditor.$set({ value: e.detail.value });
+    });
+}
+function getMarkdownValue() {
+    if (window.cherryEditor != undefined) {
+        return window.cherryEditor.getMarkdown();
+    }
+
+    if (window.byteEditor != undefined) {
+        return window.cherryEditor.getMarkdown();
+    }
 }

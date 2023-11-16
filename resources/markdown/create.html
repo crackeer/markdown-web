@@ -25,7 +25,7 @@
                         <input type="radio" name="category" :value="item" v-model="category">{{item}}
                     </label>
                     <label class="radio-inline">
-                        <button class="btn btn-sm"  @click="addCategory()">
+                        <button class="btn btn-sm" @click="addCategory()">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                         </button>
                     </label>
@@ -38,6 +38,7 @@
         </div>
     </template>
     <script>
+
         var startWork = function () {
             var vm = Vue.createApp({
                 data() {
@@ -52,23 +53,10 @@
                 template: '#template',
                 async mounted() {
                     this.getCategoryList()
-                    var plugins = [bytemdPluginGfm()];
-                    var editor = new bytemd.Editor({
-                        target: document.getElementById("markdown"),
-                        props: {
-                            value: "",
-                            uploadImages: async (file) => {
-                                return uploadFile(file)
-                            },
-                            plugins: [
-                                bytemdPluginGfm(), bytemdPluginHighlight()
-                            ],
-                        },
-                    });
-                    editor.$on('change', (e) => {
-                        this.content = e.detail.value
-                        editor.$set({ value: e.detail.value });
-                    });
+                    setTimeout(() => {
+                        initMarkdownEditor("markdown", "")
+                    }, 300)
+                    
                 },
                 methods: {
                     async getCategoryList() {
@@ -119,4 +107,5 @@
 
     </script>
 </body>
+
 </html>

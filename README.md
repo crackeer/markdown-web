@@ -49,7 +49,6 @@ CREATE TABLE code(
    title        TEXT    NOT NULL,
    language     TEXT    NOT NULL,
    content       TEXT     NOT NULL,
-   description TEXT NOT NULL,
    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
