@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>创建</title>
+    <title>文档创建</title>
     <script src="/header.js"></script>
 </head>
 
@@ -53,10 +53,7 @@
                 template: '#template',
                 async mounted() {
                     this.getCategoryList()
-                    setTimeout(() => {
-                        initMarkdownEditor("markdown", "")
-                    }, 300)
-                    
+                    initMarkdownEditor('markdown', '')
                 },
                 methods: {
                     async getCategoryList() {
@@ -78,7 +75,7 @@
                     async createMarkdown() {
                         let data = {
                             title: this.title,
-                            content: this.content,
+                            content: getMarkdownValue(),
                             category: this.category,
                         }
                         console.log(data)
@@ -95,8 +92,8 @@
                             bootbox.alert(result.data.message)
                             return
                         }
-                        jump('/', {
-                            'category': this.category,
+                        jump('/markdown/detail.html', {
+                            'id': result.data.data.id,
                         })
 
                     }

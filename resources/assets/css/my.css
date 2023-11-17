@@ -46,3 +46,8 @@ textarea {
 .bytemd {
     height: calc(100vh - 200px) !important;
 }
+
+td a {
+    display: inline-block;
+    margin: 0px 10px !important;
+}

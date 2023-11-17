@@ -32,7 +32,7 @@ var styleFiles = [
     "/assets/cherry-md/cherry-markdown.css",
     "/assets/cherry-md/katex.min.css",
 ]
-var vipJsFiles = [
+var jsFile1 = [
     "/assets/js/jquery.js",
     "/assets/js/vue.global.js",
     "/assets/js/util.js",
@@ -43,25 +43,29 @@ var vipJsFiles = [
     "/assets/cherry-md/echarts.js",
     "/assets/cherry-md/pinyin_dist.js",
 ]
-var jsFiles = [
+var jsFile2 = [
     "/assets/js/bootstrap.min.js",
     "/assets/js/bootbox.min.js",
     "/assets/bytemd/bytemd-plugin-gfm.js",
     "/assets/bytemd/plugin-highlight.js",
+
+]
+var jsFile3 = [
     "/assets/cherry-md/config.js",
+    "/assets/monaco-editor/min/vs/loader.js"
 ]
 
 document.addEventListener("DOMContentLoaded", async () => {
     loadStyles(styleFiles)
-    await loadJs(vipJsFiles)
-    await sleep(200)
-    await loadJs(jsFiles)
-    await sleep(100)
-    await loadJs(["/assets/monaco-editor/min/vs/loader.js"])
-    await sleep(100)
+    await loadJs(jsFile1)
+    //await sleep(400)
     loadNavigation()
+    await loadJs(jsFile2)
+    //await sleep(200)
+    await loadJs(jsFile3)
+    await sleep(200)
     startWork()
-   
+
 }, false);
 
 function loadNavigation() {
@@ -70,13 +74,7 @@ function loadNavigation() {
     console.log(parts[1])
     $('a[id="' + parts[1] + '-a"]').parent().addClass('active')
 }
-/*
-$(document).ready(function () {
-    $('body').prepend(header)
-    $('a[href="' + window.location.pathname + '"]').parent().addClass('active')
-    loadStyles(styleFiles)
-    loadJs(jsFiles)
-})*/
+
 
 async function loadStyles(urls) {
     var head = document.getElementsByTagName("head")[0];
@@ -93,11 +91,32 @@ function createStyleNode(url) {
     return link
 }
 
+/*
 async function loadJs(urls) {
     var head = document.getElementsByTagName("head")[0];
     for (var i = 0; i < urls.length; i++) {
         head.appendChild(createJsNode(urls[i]));
     }
+}
+*/
+
+async function loadJs(urls) {
+    //var head = document.getElementsByTagName("head")[0];
+    for (var i = 0; i < urls.length; i++) {
+        await loadJsUrl(urls[i])
+    }
+}
+
+function loadJsUrl(url) {
+    return new Promise((resolve) => {
+        let domScript = createJsNode(url)
+        domScript.onload = domScript.onreadystatechange = function () {
+            if (!this.readyState || 'loaded' === this.readyState || 'complete' === this.readyState) {
+               resolve()
+            }
+        }
+        document.getElementsByTagName('head')[0].appendChild(domScript);
+    });
 }
 
 function createJsNode(url) {

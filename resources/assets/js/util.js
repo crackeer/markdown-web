@@ -132,6 +132,7 @@ function readFiles(file) {
 }
 
 function getEditorType() {
+    return "cherry"
     return localStorage.getItem('editor-type')
 }
 
@@ -150,7 +151,7 @@ function initMarkdownEditor(target, value) {
     initByteMarkdownEditor(target, value);
 }
 function initCherryMarkdownEditor(target, value) {
-    var config = Object.assign({}, basicConfig, { value: value, id, target });
+    var config = Object.assign({}, basicConfig, { value: value, id : target });
     window.cherryEditor = new Cherry(config);
 }
 function initByteMarkdownEditor(target, value) {
@@ -165,6 +166,7 @@ function initByteMarkdownEditor(target, value) {
     });
     window.byteEditor.$on('change', (e) => {
         window.byteEditor.$set({ value: e.detail.value });
+        window.byteEditorValue = e.detail.value;
     });
 }
 function getMarkdownValue() {
@@ -173,6 +175,6 @@ function getMarkdownValue() {
     }
 
     if (window.byteEditor != undefined) {
-        return window.cherryEditor.getMarkdown();
+        return window.byteEditorValue
     }
 }

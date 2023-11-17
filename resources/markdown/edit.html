@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Markdown编辑</title>
+    <title>文档编辑</title>
 
     <script src="/header.js"></script>
 
@@ -27,7 +27,7 @@
                         <input type="radio" name="category" :value="item" v-model="category">{{item}}
                     </label>
                     <label class="radio-inline">
-                        <button class="btn btn-sm"  @click="addCategory()">
+                        <button class="btn btn-sm" @click="addCategory()">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                         </button>
                     </label>
@@ -40,7 +40,7 @@
         </div>
     </template>
     <script>
-       function startWork() {
+        function startWork() {
             var vm = Vue.createApp({
                 data() {
                     let list = []
@@ -83,26 +83,14 @@
                         this.content = result.data.data[0].content
                         this.title = result.data.data[0].title
                         this.category = result.data.data[0].category
-                        var plugins = [bytemdPluginGfm(), bytemdPluginHighlight()];
-                        var editor = new bytemd.Editor({
-                            target: document.getElementById("markdown"),
-                            props: {
-                                value: this.content,
-                                uploadImages: async (file) => {
-                                    return uploadFile(file)
-                                },
-                                plugins: plugins,
-                            },
-                        });
-                        editor.$on('change', (e) => {
-                            this.content = e.detail.value
-                            editor.$set({ value: e.detail.value });
-                        });
+                        setTimeout(() => {
+                            initMarkdownEditor("markdown", this.content)
+                        }, 300)
                     },
                     async updateMarkdown() {
                         let data = {
                             title: this.title,
-                            content: this.content,
+                            content: getMarkdownValue(),
                             category: this.category,
                         }
                         if (this.title.trim().length < 1) {
