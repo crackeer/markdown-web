@@ -37,6 +37,7 @@
     </template>
 
     <script>
+        /*
         var codeEditor = null;
         var initCodeEditor = function (lang, value) {
             require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
@@ -48,7 +49,7 @@
                     theme: "vs-dark",
                 });
             });
-        }
+        }*/
 
         var startWork = function () {
             var vm = Vue.createApp({
@@ -77,24 +78,12 @@
                         this.title = result.data.data[0].title
                         this.language = result.data.data[0].language
                         setTimeout(() => {
-                            initCodeEditor(this.language, result.data.data[0].content)
+                            initCodeEditor("container", this.language, result.data.data[0].content)
                         }, 400)
                     },
                     async getLanguageList() {
                         let result = await axios.get('/code/language')
                         this.languageList = result.data.data || []
-                    },
-                    async addLanguage() {
-                        bootbox.prompt("请输入语言", (result) => {
-                            if (result == null) {
-                                return true
-                            }
-                            if (result.length < 1) {
-                                return false
-                            }
-                            this.languageList.push(result)
-                            this.language = result
-                        })
                     },
                     async updateCode() {
                         let data = {

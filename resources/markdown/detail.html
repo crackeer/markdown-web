@@ -45,15 +45,7 @@
                         this.title = result.data.data[0].title
                         this.category = result.data.data[0].category
                         document.title = result.data.data[0].title
-                        new bytemd.Viewer({
-                            target: document.getElementById("markdown"),
-                            props: {
-                                value: this.content,
-                                plugins: [
-                                    bytemdPluginGfm(), bytemdPluginHighlight()
-                                ]
-                            },
-                        });
+                        initMarkdownPreview('markdown',  this.content)
                     }
                 }
             })

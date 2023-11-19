@@ -12,12 +12,13 @@
     <div id="app"></div>
     <template id="template">
         <div class="page-header">
-            <h3>{{this.title}} <small>语言:{{this.language}}）</small></h3>
+            <h3>{{this.title}} <small>.{{this.language}}</small></h3>
         </div>
         <div id="container" style="height: 600px;"></div>
     </template>
 
     <script>
+        /*
         var codeEditor = null;
         var initCodeEditor = function (lang, value) {
             require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
@@ -28,7 +29,7 @@
                     theme: "vs-dark",
                 });
             });
-        }
+        }*/
         var startWork = function () {
             var vm = Vue.createApp({
                 data() {
@@ -56,7 +57,7 @@
                         this.language = result.data.data[0].language
                         document.title = result.data.data[0].title
                         setTimeout(() => {
-                            initCodeEditor( this.language ,  result.data.data[0].content)
+                            initCodeEditor("container", this.language ,  result.data.data[0].content)
                         }, 200)
                     }
                 }

@@ -14,14 +14,14 @@
     <template id="template">
         <div style="padding: 1px 0 20px;">
             <label class="radio-inline">
-                <input type="radio" name="language" value="all" v-model="language"
+                <input type="radio" name="language" value="" v-model="language"
                     @change="selectLanguage('')">全部
             </label>
             <label class="radio-inline" v-for="(item, i) in languageList">
                 <input type="radio" name="language" :value="item" v-model="language"
                     @change="selectLanguage(item)">{{item}}
             </label>
-            <a class="btn btn-link" href="/code/create.html">
+            <a class="btn btn-link" :href="'/code/create.html?language=' + language">
                 新建
             </a>
         </div>
