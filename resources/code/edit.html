@@ -30,11 +30,6 @@
                     <label class="radio-inline" v-for="(item, i) in languageList">
                         <input type="radio" name="language" :value="item" v-model="language">{{item}}
                     </label>
-                    <label class="radio-inline">
-                        <button class="btn btn-sm" @click="addLanguage()">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                        </button>
-                    </label>
                 </div>
             </div>
         </div>
@@ -86,7 +81,7 @@
                         }, 400)
                     },
                     async getLanguageList() {
-                        let result = await axios.get('/distinct/code/language')
+                        let result = await axios.get('/code/language')
                         this.languageList = result.data.data || []
                     },
                     async addLanguage() {

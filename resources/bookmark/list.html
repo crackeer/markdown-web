@@ -20,50 +20,74 @@
                         aria-hidden="true"></span></button>
             </template>
             <template v-else>
-                <button class="btn btn-info" @click="setMode('')">退出{{mode == 'edit' ? '编辑':'删除'}}模式</button>
-            </template>
+                <div data-spy="affix" data-offset-top="60" data-offset-bottom="200">
 
+                    <button class="btn btn-info" @click="setMode('')">退出{{mode == 'edit' ? '编辑':'删除'}}模式</button>
+                    <button class="btn btn-danger" @click="batchDelete()"
+                        v-if="mode == 'delete' && deleteIds.length > 0"
+                        style="margin-left: 10px;">确认删除{{deleteIds.length }}选中的书签</button>
+                </div>
+            </template>
         </div>
 
-        <template v-for="item in list">
+        <template v-for="item in list" v-if="mode.length < 1">
             <div class="panel panel-default">
                 <div class="panel-heading" style="font-size: 16px;">
-                    <strong>{{item.category}}</strong>
-                    <template v-if="mode == 'edit'">
-                        <a @click="showAddModal(item)" style="font-size: 14px; margin-left: 10px;">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                        </a>
-                    </template>
-
-                    <div style="float: right;" v-if="mode == 'delete'">
-                        <a type="button" class="btn btn-text btn-sm" @click="showBatchDeleteModal(item)">
-                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                        </a>
-                    </div>
+                    <strong>{{item.category}} · {{item.list.length}}</strong>
                 </div>
                 <div class="panel-body">
-                    <template v-for="item2 in item.list" v-if="mode == 'edit'">
+                    <div class="row">
+                        <template v-for="item2 in item.list" v-if="mode == ''">
+                            <div class="col-xs-6 col-md-3">
+                                <a :href="item2.link" target="_blank" class="thumbnail" style="padding: 10px;">
+                                    {{item2.title.length > 12 ? item2.title.substring(0, 12) +'...' : item2.title}}
+                                </a>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template v-for="item in list" v-if="mode == 'edit'">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="font-size: 16px;">
+                    <strong>{{item.category}} · {{item.list.length}}</strong>
+                    <a @click="showAddModal(item)" style="font-size: 14px; margin-left: 10px;">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    </a>
+                </div>
+                <div class="panel-body">
+                    <template v-for="item2 in item.list">
                         <button type="button" class="btn btn-default" aria-label="Left Align"
                             @click="showEditModel(item2)">
                             {{item2.title}}
                             <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                         </button>
                     </template>
-                    <template v-for="item2 in item.list" v-if="mode == 'delete'">
-                        <button type="button" class="btn btn-default" aria-label="Left Align"
-                            @click="showDeleteModal(item2)">
-                            {{item2.title}}
-                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                        </button>
-                    </template>
-                    <template v-for="item2 in item.list" v-if="mode == ''">
-                        <a :href="item2.link" target="_blank" class="btn">
-                            {{item2.title}}
-                        </a>
+                </div>
+            </div>
+        </template>
+
+        <template v-for="item in list" v-if="mode == 'delete'">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="font-size: 16px;">
+                    <strong>{{item.category}} · {{item.list.length}}</strong> <span class="glyphicon glyphicon-th-list"
+                        aria-hidden="true" @click="showBatchDeleteModal(item)" style="font-size: 14px;"></span>
+                </div>
+                <div class="panel-body">
+                    <template v-for="item2 in item.list">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" :value="item2.id" v-model="deleteIds"
+                                    name="deleteIds">{{item2.title}}
+                            </label>
+                        </div>
                     </template>
                 </div>
             </div>
         </template>
+
         <div class="modal fade" tabindex="-1" role="dialog" id="myAddModal">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
@@ -140,7 +164,7 @@
 
     </template>
     <script>
-        var startWork =function() {
+        var startWork = function () {
             var vm = Vue.createApp({
                 data() {
                     return {
@@ -153,6 +177,7 @@
                         list: [],
                         categoryList: [],
                         addIds: [],
+                        deleteIds: [],
                     }
                 },
                 template: '#template',
@@ -183,7 +208,6 @@
                                 'list': groupBookmark[categorys[i]],
                             })
                         }
-                        console.log(groupBookmarkList)
                         this.list = groupBookmarkList
                         this.getCategoryList()
                     },
@@ -196,7 +220,7 @@
                     },
                     async showEditModel(item) {
                         this.title = item.title
-                        this.link = item.title
+                        this.link = item.link
                         this.category = item.category
                         this.bookmark_id = item.id
                         this.edit = true
@@ -217,7 +241,26 @@
                             this.getList()
                         }
                     },
+                    async batchDelete(id) {
+                        for (var i in this.deleteIds) {
+                            let result = await axios.post('/delete/bookmark/' + this.deleteIds[i])
+                        }
+                        bootbox.alert("删除完成", () => {
+                            this.getList()
+                            this.deleteIds = []
+                        })
+
+                    },
                     showBatchDeleteModal(item) {
+                        let tmp = {}
+                        for (var i = 0; i < this.deleteIds.length; i++) {
+                            tmp[this.deleteIds[i]] = true
+                        }
+                        for (var i = 0; i < item.list.length; i++) {
+                            tmp[item.list[i].id] = true
+                        }
+                        this.deleteIds = Object.keys(tmp)
+                        return
                         bootbox.confirm("确认删除`" + item.category + "`分类下的所有书签？", async (result) => {
                             if (!result) {
                                 return
@@ -243,6 +286,7 @@
                     },
                     setMode(mode) {
                         this.mode = mode
+                        this.deleteIds = []
                     },
                     async importBookmark() {
                         let result = await window.showOpenFilePicker();
@@ -305,7 +349,7 @@
     </script>
 </body>
 <style>
-  
+
 </style>
 
 </html>

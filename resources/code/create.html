@@ -17,7 +17,7 @@
         <div class="form-horizontal">
             <div class="form-group">
                 <label for="title" class="col-sm-1 control-label">标题</label>
-                <div class="col-sm-9">
+                <div class="col-sm-5">
                     <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
                 </div>
                 <div class="col-sm-2">
@@ -29,11 +29,6 @@
                 <div class="col-sm-9">
                     <label class="radio-inline" v-for="(item, i) in languageList">
                         <input type="radio" name="language" :value="item" v-model="language">{{item}}
-                    </label>
-                    <label class="radio-inline">
-                        <button class="btn btn-sm" @click="addLanguage()">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                        </button>
                     </label>
                 </div>
             </div>
@@ -75,7 +70,7 @@
                 },
                 methods: {
                     async getLanguageList() {
-                        let result = await axios.get('/distinct/code/language')
+                        let result = await axios.get('/code/language')
                         this.languageList = result.data.data || []
                     },
                     async addLanguage() {

@@ -18,9 +18,10 @@ import (
 )
 
 type AppConfig struct {
-	Port     int64    `env:"PORT"`
-	Database string   `env:"DATABASE"`
-	Category []string `env:"CATEGORY" envSeparator:","`
+	Port         int64    `env:"PORT"`
+	Database     string   `env:"DATABASE"`
+	Category     []string `env:"CATEGORY" envSeparator:","`
+	CodeLanguage []string `env:"CODE_LANGUAGE" envSeparator:","`
 }
 
 var (
@@ -47,6 +48,9 @@ func main() {
 	router.GET("/distinct/:table/:colum", ginHelper.DoResponseJSON(), distinctData)
 	router.GET("/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, cfg.Category)
+	})
+	router.GET("/code/language", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
+		ginHelper.Success(ctx, cfg.CodeLanguage)
 	})
 	router.NoRoute(createStaticHandler(http.Dir("./resources")))
 	router.Run(fmt.Sprintf(":%d", cfg.Port))

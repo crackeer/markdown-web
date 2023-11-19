@@ -61,7 +61,7 @@
                 },
                 methods: {
                     async getLanguageList() {
-                        let result = await axios.get('/distinct/code/language')
+                        let result = await axios.get('/code/language')
                         this.languageList = result.data.data
                     },
                     async getList() {
