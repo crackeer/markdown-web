@@ -16,9 +16,13 @@
         <div class="form-horizontal">
             <div class="form-group">
                 <label for="title" class="col-sm-1 control-label">标题</label>
-                <div class="col-sm-9">
+                <div class="col-sm-6">
                     <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
                 </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary" @click="updateMarkdown">更新</button>
+                </div>
+
             </div>
             <div class="form-group">
                 <label for="title" class="col-sm-1 control-label">分类</label>
@@ -27,17 +31,14 @@
                         <input type="radio" name="category" :value="item" v-model="category">{{item}}
                     </label>
                     <label class="radio-inline">
-                        <button class="btn btn-sm" @click="addCategory()">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                        </button>
+                        <a  href="javascript:;" @click="addCategory()">
+                            增加
+                        </a>
                     </label>
                 </div>
             </div>
         </div>
         <div id="markdown" style="height: auto;"></div>
-        <div style="margin: 20px auto;text-align: center;">
-            <button class="btn btn-primary" @click="updateMarkdown">提交</button>
-        </div>
     </template>
     <script>
         function startWork() {

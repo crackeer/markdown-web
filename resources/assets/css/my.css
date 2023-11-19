@@ -5,7 +5,7 @@ body {
 
 .link-list a {
     display: inline-block;
-    margin: 5px 20px;
+    margin:  0 10px;
 }
 
 .label {
@@ -13,14 +13,8 @@ body {
     margin-left: 5px;
 }
 
-.pic-list img {
-    display: block;
-    border: 1px solid gray;
-    margin: 5px auto;
-}
-
-.progress strong {
-    font-size: 16px;
+.align-center {
+    text-align: center!important;
 }
 
 textarea {
@@ -32,22 +26,19 @@ textarea {
     margin: 0 4px 0 0 !important;
 }
 
-.large {
-    font-size: 17px;
-    font-weight: bold;
-}
 .red {
     color: red;
 }
-.bold {
-    font-weight: bold;;
-}
-
 .bytemd {
     height: calc(100vh - 200px) !important;
 }
 
-td a {
-    display: inline-block;
-    margin: 0px 10px !important;
+.bookmark {
+    display: block;
+    padding: 4px;
+    margin-bottom: 5px;
+    background-color: #fff;
+    -webkit-transition: border .2s ease-in-out;
+    -o-transition: border .2s ease-in-out;
+    transition: border .2s ease-in-out
 }

@@ -17,31 +17,41 @@
             <button class="btn btn-warning" @click="setMode('edit')" style="margin-right: 10px;">编辑</button>
             <button class="btn btn-info" @click="importBookmark">导入浏览器标签 <span class="glyphicon glyphicon-import"
                     aria-hidden="true"></span></button>
-
         </div>
         <div style="position: sticky; top: 0;  padding-bottom:  20px; z-index: 1000;" v-if="mode.length > 0">
             <button class="btn btn-info" @click="setMode('')">退出编辑模式</button>
             <button class="btn btn-danger" @click="batchDelete()" v-if="selectIds.length > 0"
                 style="margin-left: 10px;">删除选中的{{selectIds.length }}个书签</button>
-            <button class="btn btn-primary" @click="showBatchUpdateModal()"
-                v-if="selectIds.length > 0" style="margin-left: 10px;">转移选中的{{selectIds.length
+            <button class="btn btn-primary" @click="showBatchUpdateModal()" v-if="selectIds.length > 0"
+                style="margin-left: 10px;">转移选中的{{selectIds.length
                 }}个书签</button>
         </div>
 
+        <div style="position: sticky; top: 0;  padding:10px; z-index: 1000; text-align: center; background-color: #f5f5f5; font-size: 18px;margin-bottom: 10px; opacity: 0.8;"
+            v-if="mode == ''" class="link-list">
+            <template v-for="item in list">
+                <a :href="'#' + item.category">
+                    {{item.category}}
+                </a>
+            </template>
+        </div>
+
         <template v-for="item in list" v-if="mode.length < 1">
-            <div class="panel panel-default">
-                <div class="panel-heading" style="font-size: 16px;">
-                    <strong>{{item.category}} · {{item.list.length}}</strong>
-                </div>
-                <div class="panel-body">
-                    <div class="row">
-                        <template v-for="item2 in item.list" v-if="mode == ''">
-                            <div class="col-xs-6 col-md-3">
-                                <a :href="item2.link" target="_blank" class="thumbnail" style="padding: 10px;">
-                                    {{item2.title.length > 12 ? item2.title.substring(0, 12) +'...' : item2.title}}
-                                </a>
-                            </div>
-                        </template>
+            <div :id="item.category">
+                <div class="panel panel-default">
+                    <div class="panel-heading" :id="item.category" style="font-size: 16px;">
+                        <strong>{{item.category}}({{item.list.length}})</strong>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <template v-for="item2 in item.list" v-if="mode == ''">
+                                <div class="col-xs-6 col-md-3">
+                                    <a :href="item2.link" target="_blank" class="bookmark">
+                                        {{item2.title.length > 17 ? item2.title.substring(0, 17) +'...' : item2.title}}
+                                    </a>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -83,7 +93,8 @@
                         <template v-for="item in list">
                             <div class="radio">
                                 <label>
-                                    <input type="radio" name="category" :value="item.category" v-model="category">{{item.category}}
+                                    <input type="radio" name="category" :value="item.category"
+                                        v-model="category">{{item.category}}
                                 </label>
                             </div>
                         </template>
