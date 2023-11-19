@@ -10,24 +10,22 @@
 
 <body>
     <div id="app"></div>
-    <template id="template">
-        <div style="padding: 1px 0 20px;display: flex;">
-            <template v-if="mode.length < 1">
-                <button class="btn btn-primary" @click="showCreateModel()" style="margin-right: 10px;">新建</button>
-                <button class="btn btn-warning" @click="setMode('edit')" style="margin-right: 10px;">编辑</button>
-                <button class="btn btn-danger" @click="setMode('delete')" style="margin-right: 10px;">删除</button>
-                <button class="btn btn-info" @click="importBookmark">导入浏览器标签 <span class="glyphicon glyphicon-import"
-                        aria-hidden="true"></span></button>
-            </template>
-            <template v-else>
-                <div data-spy="affix" data-offset-top="60" data-offset-bottom="200">
 
-                    <button class="btn btn-info" @click="setMode('')">退出{{mode == 'edit' ? '编辑':'删除'}}模式</button>
-                    <button class="btn btn-danger" @click="batchDelete()"
-                        v-if="mode == 'delete' && deleteIds.length > 0"
-                        style="margin-left: 10px;">确认删除{{deleteIds.length }}选中的书签</button>
-                </div>
-            </template>
+    <template id="template">
+        <div style="padding-bottom:  20px; " v-if="mode.length < 1">
+            <button class="btn btn-primary" @click="showCreateModel()" style="margin-right: 10px;">新建</button>
+            <button class="btn btn-warning" @click="setMode('edit')" style="margin-right: 10px;">编辑</button>
+            <button class="btn btn-info" @click="importBookmark">导入浏览器标签 <span class="glyphicon glyphicon-import"
+                    aria-hidden="true"></span></button>
+
+        </div>
+        <div style="position: sticky; top: 0;  padding-bottom:  20px; z-index: 1000;" v-if="mode.length > 0">
+            <button class="btn btn-info" @click="setMode('')">退出编辑模式</button>
+            <button class="btn btn-danger" @click="batchDelete()" v-if="selectIds.length > 0"
+                style="margin-left: 10px;">删除选中的{{selectIds.length }}个书签</button>
+            <button class="btn btn-primary" @click="showBatchUpdateModal()"
+                v-if="selectIds.length > 0" style="margin-left: 10px;">转移选中的{{selectIds.length
+                }}个书签</button>
         </div>
 
         <template v-for="item in list" v-if="mode.length < 1">
@@ -53,35 +51,20 @@
             <div class="panel panel-default">
                 <div class="panel-heading" style="font-size: 16px;">
                     <strong>{{item.category}} · {{item.list.length}}</strong>
-                    <a @click="showAddModal(item)" style="font-size: 14px; margin-left: 10px;">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    </a>
                 </div>
                 <div class="panel-body">
-                    <template v-for="item2 in item.list">
-                        <button type="button" class="btn btn-default" aria-label="Left Align"
-                            @click="showEditModel(item2)">
-                            {{item2.title}}
-                            <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-                        </button>
-                    </template>
-                </div>
-            </div>
-        </template>
-
-        <template v-for="item in list" v-if="mode == 'delete'">
-            <div class="panel panel-default">
-                <div class="panel-heading" style="font-size: 16px;">
-                    <strong>{{item.category}} · {{item.list.length}}</strong> <span class="glyphicon glyphicon-th-list"
-                        aria-hidden="true" @click="showBatchDeleteModal(item)" style="font-size: 14px;"></span>
-                </div>
-                <div class="panel-body">
+                    <div class="btn-group btn-group-xs" role="group">
+                        <button type="button" class="btn btn-default" @click="selectAll(item)">全选</button>
+                        <button type="button" class="btn btn-default" @click="deselectAll(item)">全不选</button>
+                    </div>
                     <template v-for="item2 in item.list">
                         <div class="checkbox">
                             <label>
-                                <input type="checkbox" :value="item2.id" v-model="deleteIds"
-                                    name="deleteIds">{{item2.title}}
+                                <input type="checkbox" :value="item2.id" v-model="selectIds"
+                                    name="selectIds">{{item2.title}}
                             </label>
+                            <a @click="showEditModel(item2)" style="margin-left: 7px;">
+                                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
                         </div>
                     </template>
                 </div>
@@ -94,20 +77,15 @@
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">添加书签到`{{category}}`</h4>
+                        <h4 class="modal-title">转移书签到</h4>
                     </div>
                     <div class="modal-body">
-
                         <template v-for="item in list">
-                            <template v-if="item.category != category">
-                                <h3 style="font-size: 16px;">{{item.category}}</h3>
-                                <template v-for="item2 in item.list">
-                                    <label class="checkbox-inline" style="margin-bottom: 10px;">
-                                        <input type="checkbox" :value="item2.id" v-model="addIds"
-                                            name="addIds">{{item2.title}}
-                                    </label>
-                                </template>
-                            </template>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="category" :value="item.category" v-model="category">{{item.category}}
+                                </label>
+                            </div>
                         </template>
                     </div>
                     <div class="modal-footer">
@@ -177,7 +155,7 @@
                         list: [],
                         categoryList: [],
                         addIds: [],
-                        deleteIds: [],
+                        selectIds: [],
                     }
                 },
                 template: '#template',
@@ -242,51 +220,52 @@
                         }
                     },
                     async batchDelete(id) {
-                        for (var i in this.deleteIds) {
-                            let result = await axios.post('/delete/bookmark/' + this.deleteIds[i])
+                        for (var i in this.selectIds) {
+                            let result = await axios.post('/delete/bookmark/' + this.selectIds[i])
                         }
                         bootbox.alert("删除完成", () => {
                             this.getList()
-                            this.deleteIds = []
+                            this.selectIds = []
                         })
 
                     },
-                    showBatchDeleteModal(item) {
+                    selectAll(item) {
                         let tmp = {}
-                        for (var i = 0; i < this.deleteIds.length; i++) {
-                            tmp[this.deleteIds[i]] = true
+                        for (var i = 0; i < this.selectIds.length; i++) {
+                            tmp[this.selectIds[i]] = true
                         }
                         for (var i = 0; i < item.list.length; i++) {
                             tmp[item.list[i].id] = true
                         }
-                        this.deleteIds = Object.keys(tmp)
-                        return
-                        bootbox.confirm("确认删除`" + item.category + "`分类下的所有书签？", async (result) => {
-                            if (!result) {
-                                return
-                            }
-                            for (var i = 0; i < item.list.length; i++) {
-                                await this.doDelete(item.list[i].id)
-                            }
-                        })
+                        this.selectIds = Object.keys(tmp)
                     },
-                    showAddModal(item) {
-                        this.category = item.category
-                        this.addIds = []
+                    deselectAll(item) {
+                        let tmp = {}
+                        for (var i = 0; i < this.selectIds.length; i++) {
+                            tmp[this.selectIds[i]] = true
+                        }
+                        for (var i = 0; i < item.list.length; i++) {
+                            delete tmp[item.list[i].id]
+                        }
+                        this.selectIds = Object.keys(tmp)
+                    },
+                    showBatchUpdateModal(item) {
+                        this.category = ''
                         $('#myAddModal').modal('show')
                     },
                     async doBatchUpdate() {
-                        for (var i in this.addIds) {
-                            let result = await axios.post('/modify/bookmark/' + this.addIds[i], {
+                        for (var i in this.selectIds) {
+                            let result = await axios.post('/modify/bookmark/' + this.selectIds[i], {
                                 'category': this.category,
                             })
                         }
+                        this.selectIds = []
                         $('#myAddModal').modal('hide')
                         this.getList()
                     },
                     setMode(mode) {
                         this.mode = mode
-                        this.deleteIds = []
+                        this.selectIds = []
                     },
                     async importBookmark() {
                         let result = await window.showOpenFilePicker();
