@@ -1,6 +1,6 @@
-# 个人markdown文档、书签、代码管理工具
+# 个人markdown、书签、代码管理web后台
 
-个人使用的`markdown文档编辑器`，`书签管理`,`代码片段管理`的web站点，后端使用`golang`，前端纯静态，无需编译（反编译，大道至简）
+个人使用的`markdown编辑器`，`书签管理`,`代码片段管理`的web站点，后端使用`golang`，前端纯静态，无需编译（反编译，大道至简）
 
 1. 数据库可选用使用`MySQL`| `SQLite`
 2. markdown编辑器使用`cherry-markdown`(from:https://github.com/Tencent/cherry-markdown)
