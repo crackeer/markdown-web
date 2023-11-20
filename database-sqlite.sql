@@ -1,0 +1,26 @@
+CREATE TABLE markdown(
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   title           TEXT    NOT NULL,
+   content        TEXT    NOT NULL,
+   category           TEXT     NOT NULL,
+   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE bookmark(
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   title           TEXT    NOT NULL,
+   link        TEXT    NOT NULL,
+   category           TEXT     NOT NULL,
+   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE code(
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   title        TEXT    NOT NULL,
+   language     TEXT    NOT NULL,
+   content       TEXT     NOT NULL,
+   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
