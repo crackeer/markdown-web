@@ -29,9 +29,7 @@ var styleFiles = [
     "/assets/bytemd/bytemd.css",
     "/assets/bytemd/github-markdown.css",
     "/assets/bytemd/highlight.css",
-    "/assets/cherry-md/cherry-markdown.css",
     "/assets/cherry-md/katex.min.css",
-    //"/assets/cherry-md/viewer.css",
 ]
 var jsFile1 = [
     "/assets/js/jquery.js",
@@ -40,9 +38,6 @@ var jsFile1 = [
     "/assets/js/axios.min.js",
     "/assets/js/dayjs.min.js",
     "/assets/bytemd/bytemd.umd.js",
-    "/assets/cherry-md/cherry-markdown.js",
-    "/assets/cherry-md/echarts.js",
-    "/assets/cherry-md/pinyin_dist.js",
 ]
 var jsFile2 = [
     "/assets/js/bootstrap.min.js",
@@ -52,9 +47,7 @@ var jsFile2 = [
 
 ]
 var jsFile3 = [
-    "/assets/cherry-md/config.js",
     "/assets/monaco-editor/min/vs/loader.js",
-    //"/assets/cherry-md/viewer.js"
 ]
 
 document.addEventListener("DOMContentLoaded", async () => {

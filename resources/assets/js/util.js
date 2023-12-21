@@ -142,20 +142,6 @@ function setEditorType(editorType) {
 
 
 function initMarkdownEditor(target, value) {
-    let editorType = getEditorType();
-    if (editorType == "cherry") {
-        initCherryMarkdownEditor(target, value);
-        return
-    }
-    initByteMarkdownEditor(target, value);
-}
-
-
-function initCherryMarkdownEditor(target, value) {
-    var config = Object.assign({}, basicConfig, { value: value, id : target });
-    window.cherryEditor = new Cherry(config);
-}
-function initByteMarkdownEditor(target, value) {
     window.byteEditor = new bytemd.Editor({
         target: document.getElementById(target),
         props: {
@@ -171,25 +157,10 @@ function initByteMarkdownEditor(target, value) {
     });
 }
 function getMarkdownValue() {
-    if (window.cherryEditor != undefined) {
-        return window.cherryEditor.getMarkdown();
-    }
-
-    if (window.byteEditor != undefined) {
-        return window.byteEditorValue
-    }
+    return window.byteEditorValue
 }
 
 function initMarkdownPreview(target, value) {
-    let editorType = getEditorType();
-    if (editorType == "cherry") {
-        initCherryMarkdownPreview(target, value);
-        return
-    }
-    initByteMarkdownPreview(target, value);
-}
-
-function initByteMarkdownPreview(target, value) {
     new bytemd.Viewer({
         target: document.getElementById(target),
         props: {
@@ -201,12 +172,6 @@ function initByteMarkdownPreview(target, value) {
     });
 }
 
-function initCherryMarkdownPreview(target, value) {
-    var config = Object.assign({}, basicConfig, { value: value, id : target,  editor: {
-        defaultModel: 'previewOnly',
-      }, });
-    window.cherryEditor = new Cherry(config);
-}
 
 function initCodeEditor(target, lang, value) {
     require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
