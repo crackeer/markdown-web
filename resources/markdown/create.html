@@ -35,7 +35,7 @@
                 </div>
             </div>
         </div>
-        <div id="markdown" style="height: auto;"></div>
+        <div id="markdown"></div>
     </template>
     <script>
 
@@ -53,7 +53,9 @@
                 template: '#template',
                 async mounted() {
                     this.getCategoryList()
-                    initMarkdownEditor('markdown', '')
+                    initMarkdownEditor('markdown', '', (value) => {
+                        this.content = value
+                    })
                 },
                 methods: {
                     async getCategoryList() {
@@ -75,7 +77,7 @@
                     async createMarkdown() {
                         let data = {
                             title: this.title,
-                            content: getMarkdownValue(),
+                            content: this.content,
                             category: this.category,
                         }
                         console.log(data)

@@ -141,20 +141,29 @@ function setEditorType(editorType) {
 }
 
 
-function initMarkdownEditor(target, value) {
-    window.byteEditor = new bytemd.Editor({
-        target: document.getElementById(target),
-        props: {
-            value: value,
-            plugins: [
-                bytemdPluginGfm(), bytemdPluginHighlight()
-            ],
-        },
-    });
-    window.byteEditor.$on('change', (e) => {
-        window.byteEditor.$set({ value: e.detail.value });
-        window.byteEditorValue = e.detail.value;
-    });
+function initMarkdownEditor(target, value, callback) {
+    if(window.byteEditor != undefined) {
+        window.byteEditor.$set({ value: value });
+        return
+    }
+    setTimeout(() => {
+         window.byteEditor = new bytemd.Editor({
+            target: document.getElementById(target),
+            props: {
+                value: value,
+                plugins: [
+                    bytemdPluginGfm(), bytemdPluginHighlight()
+                ],
+            },
+        });
+        window.byteEditor.$on('change', (e) => {
+            console.log(e.detail.value)
+            window.byteEditor.$set({ value: e.detail.value });
+            callback && callback(e.detail.value)
+            window.byteEditorValue = e.detail.value;
+        });
+    }, 200)
+   
 }
 function getMarkdownValue() {
     return window.byteEditorValue

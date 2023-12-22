@@ -38,8 +38,9 @@
                 </div>
             </div>
         </div>
-        <div id="markdown" style="height: auto;"></div>
+        
     </template>
+    <div id="markdown"></div>
     <script>
         function startWork() {
             var vm = Vue.createApp({
@@ -84,14 +85,14 @@
                         this.content = result.data.data[0].content
                         this.title = result.data.data[0].title
                         this.category = result.data.data[0].category
-                        setTimeout(() => {
-                            initMarkdownEditor("markdown", this.content)
-                        }, 300)
+                        initMarkdownEditor("markdown", this.content, (value) => {
+                            this.content = value
+                        })
                     },
                     async updateMarkdown() {
                         let data = {
                             title: this.title,
-                            content: getMarkdownValue(),
+                            content: this.content,
                             category: this.category,
                         }
                         if (this.title.trim().length < 1) {
