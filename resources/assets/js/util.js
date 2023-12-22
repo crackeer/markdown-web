@@ -174,6 +174,7 @@ function initMarkdownPreview(target, value) {
 
 
 function initCodeEditor(target, lang, value) {
+    document.getElementById(target).style.height = getCodeEditorHeight() + 'px'
     require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
     require(['vs/editor/editor.main'], function () {
         window.codeEditor = monaco.editor.create(document.getElementById(target), {
@@ -184,4 +185,8 @@ function initCodeEditor(target, lang, value) {
             automaticLayout: true,
         });
     });
+}
+
+function getCodeEditorHeight() {
+    return window.screen.height - 300
 }

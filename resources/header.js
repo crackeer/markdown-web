@@ -9,7 +9,7 @@ var header = `
                 <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="/">
-                <img src="/assets/images/logo.svg" alt="" />
+              首页
             </a>
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapse-1">
