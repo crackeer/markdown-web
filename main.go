@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -17,19 +20,22 @@ import (
 	"gorm.io/gorm"
 )
 
+// AppConfig
 type AppConfig struct {
-	Port         int64    `env:"PORT"`
-	Database     string   `env:"DATABASE"`
-	Category     []string `env:"CATEGORY" envSeparator:","`
-	CodeLanguage []string `env:"CODE_LANGUAGE" envSeparator:","`
+	Port                 int64    `env:"PORT"`
+	Database             string   `env:"DATABASE"`
+	CodeLanguage         []string `env:"CODE_LANGUAGE" envSeparator:","`
+	UserProfileDirectory string   `env:"USER_PROFILE_DIRECTORY"`
 }
 
 var (
 	globalDB *gorm.DB
+	cfg      *AppConfig
+	tokenKey string = "token"
 )
 
 func main() {
-	cfg := &AppConfig{}
+	cfg = &AppConfig{}
 	if err := env.Parse(cfg); err != nil {
 		panic(err)
 	}
@@ -39,6 +45,7 @@ func main() {
 		globalDB = db
 	}
 	router := gin.New()
+	router.POST("/login", ginHelper.DoResponseJSON(), Login)
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
 	router.POST("/delete/:table/:id", ginHelper.DoResponseJSON(), deleteData)
@@ -46,9 +53,6 @@ func main() {
 	router.POST("/modify/:table/:id", ginHelper.DoResponseJSON(), modifyData)
 	router.GET("/query/:table", ginHelper.DoResponseJSON(), queryData)
 	router.GET("/distinct/:table/:colum", ginHelper.DoResponseJSON(), distinctData)
-	router.GET("/category", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
-		ginHelper.Success(ctx, cfg.Category)
-	})
 	router.GET("/code/language", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
 		ginHelper.Success(ctx, cfg.CodeLanguage)
 	})
@@ -236,4 +240,64 @@ func distinctData(ctx *gin.Context) {
 
 	globalDB.Table(getTable(ctx)).Where(query).Distinct(colum).Find(&list)
 	ginHelper.Success(ctx, list)
+}
+
+func getCookieDomain(ctx *gin.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	host := ctx.Request.Host
+	if strings.Contains(host, ":") {
+		return strings.Split(host, ":")[0]
+	}
+	return host
+}
+
+type LoginForm struct {
+	Token string `json:"token"`
+}
+
+// User
+type User struct {
+	Name     string `json:"name"`
+	Nickname string `json:"nickname"`
+}
+
+func parseUser(token string) (*User, error) {
+	bytes, err := os.ReadFile(filepath.Join(cfg.UserProfileDirectory, token))
+	if err != nil {
+		return nil, errors.New("user not exist")
+	}
+	user := &User{}
+	err = json.Unmarshal(bytes, &user)
+	if err != nil {
+		return nil, errors.New("user not ok")
+	}
+	return user, nil
+}
+
+func checkLogin(ctx *gin.Context) {
+
+}
+
+// Login
+//
+//	@param ctx
+func Login(ctx *gin.Context) {
+	loginForm := &LoginForm{}
+	if err := ctx.ShouldBindJSON(loginForm); err != nil {
+		ginHelper.Failure(ctx, -1, err.Error())
+		return
+	}
+
+	user, err := parseUser(loginForm.Token)
+
+	if err != nil {
+		ginHelper.Failure(ctx, -1, err.Error())
+		return
+	}
+
+	domain := getCookieDomain(ctx)
+	ctx.SetCookie(tokenKey, loginForm.Token, 3600*24*365, "/", domain, true, false)
+	ginHelper.Success(ctx, user)
 }

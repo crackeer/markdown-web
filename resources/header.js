@@ -54,7 +54,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadStyles(styleFiles)
     await loadJs(jsFile1)
     //await sleep(400)
-    loadNavigation()
+    if(window.hideHeader != undefined && window.hideHeader ) {
+    } else {
+        loadNavigation()
+    }
+    
     await loadJs(jsFile2)
     //await sleep(200)
     await loadJs(jsFile3)
