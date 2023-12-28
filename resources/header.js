@@ -66,7 +66,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     //await sleep(200)
     await loadJs(jsFile3)
     await sleep(200)
-    startWork()
+    if (startWork != undefined) {
+        startWork()
+    }
+
 
 }, false);
 
@@ -114,7 +117,7 @@ function loadJsUrl(url) {
         let domScript = createJsNode(url)
         domScript.onload = domScript.onreadystatechange = function () {
             if (!this.readyState || 'loaded' === this.readyState || 'complete' === this.readyState) {
-               resolve()
+                resolve()
             }
         }
         document.getElementsByTagName('head')[0].appendChild(domScript);
