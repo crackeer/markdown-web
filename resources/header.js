@@ -9,7 +9,7 @@ var header = `
                 <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="/">
-                <img src="/assets/images/logo.svg" alt="" />
+              首页
             </a>
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapse-1">
@@ -29,9 +29,7 @@ var styleFiles = [
     "/assets/bytemd/bytemd.css",
     "/assets/bytemd/github-markdown.css",
     "/assets/bytemd/highlight.css",
-    "/assets/cherry-md/cherry-markdown.css",
     "/assets/cherry-md/katex.min.css",
-    //"/assets/cherry-md/viewer.css",
 ]
 var jsFile1 = [
     "/assets/js/jquery.js",
@@ -40,9 +38,6 @@ var jsFile1 = [
     "/assets/js/axios.min.js",
     "/assets/js/dayjs.min.js",
     "/assets/bytemd/bytemd.umd.js",
-    "/assets/cherry-md/cherry-markdown.js",
-    "/assets/cherry-md/echarts.js",
-    "/assets/cherry-md/pinyin_dist.js",
 ]
 var jsFile2 = [
     "/assets/js/bootstrap.min.js",
@@ -52,16 +47,18 @@ var jsFile2 = [
 
 ]
 var jsFile3 = [
-    "/assets/cherry-md/config.js",
     "/assets/monaco-editor/min/vs/loader.js",
-    //"/assets/cherry-md/viewer.js"
 ]
 
 document.addEventListener("DOMContentLoaded", async () => {
     loadStyles(styleFiles)
     await loadJs(jsFile1)
     //await sleep(400)
-    loadNavigation()
+    if(window.hideHeader != undefined && window.hideHeader ) {
+    } else {
+        loadNavigation()
+    }
+    
     await loadJs(jsFile2)
     //await sleep(200)
     await loadJs(jsFile3)

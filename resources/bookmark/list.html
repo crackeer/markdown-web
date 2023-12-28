@@ -12,10 +12,10 @@
     <div id="app"></div>
 
     <template id="template">
-        <div style="padding-bottom:  20px; " v-if="mode.length < 1">
-            <button class="btn btn-primary" @click="showCreateModel()" style="margin-right: 10px;">新建</button>
-            <button class="btn btn-warning" @click="setMode('edit')" style="margin-right: 10px;">编辑</button>
-            <button class="btn btn-info" @click="importBookmark">导入浏览器标签 <span class="glyphicon glyphicon-import"
+        <div style="position: fixed; right: 10px; bottom: 60px; z-index: 1000" v-if="mode.length < 1">
+            <button class="btn btn-primary btn-block" @click="showCreateModel()" style="margin-right: 10px;">新建</button>
+            <button class="btn btn-warning btn-block" @click="setMode('edit')" style="margin-right: 10px;">编辑</button>
+            <button class="btn btn-info btn-block" @click="importBookmark">导入标签 <span class="glyphicon glyphicon-import"
                     aria-hidden="true"></span></button>
         </div>
         <div style="position: sticky; top: 0;  padding-bottom:  20px; z-index: 1000;" v-if="mode.length > 0">
@@ -172,6 +172,12 @@
                 template: '#template',
                 async mounted() {
                     this.getList()
+                    $('#affix').affix({
+                      offset: {
+                        top: 100,
+                        bottom: 200
+                      }
+                    })
                 },
                 methods: {
                     async getCategoryList() {

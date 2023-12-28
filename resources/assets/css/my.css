@@ -1,5 +1,5 @@
 body {
-    padding: 10px 5% 50px;
+    padding: 0px 7.5% 50px;
     font-family: 'Georgia,serif';
 }
 
@@ -30,7 +30,7 @@ textarea {
     color: red;
 }
 .bytemd {
-    height: calc(100vh - 200px) !important;
+    height: 500px!important
 }
 
 .bookmark {
@@ -41,4 +41,13 @@ textarea {
     -webkit-transition: border .2s ease-in-out;
     -o-transition: border .2s ease-in-out;
     transition: border .2s ease-in-out
+}
+
+.navbar {
+    margin-bottom: 7px!important;
+    min-height: 0;
+    border:0px;
+}
+.page-header {
+    margin-top: 5px!important;
 }
