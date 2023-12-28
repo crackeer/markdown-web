@@ -18,6 +18,14 @@ var header = `
                 <li><a href="/bookmark/list.html" id="bookmark-a">书签</a></li>
                 <li><a href="/code/list.html" id="code-a">代码</a></li>
             </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="username">暂无<span class="caret"></span></a>
+                    <ul class="dropdown-menu" style="z-index:10000">
+                        <li><a href="/logout">退出</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
@@ -29,7 +37,6 @@ var styleFiles = [
     "/assets/bytemd/bytemd.css",
     "/assets/bytemd/github-markdown.css",
     "/assets/bytemd/highlight.css",
-    "/assets/cherry-md/katex.min.css",
 ]
 var jsFile1 = [
     "/assets/js/jquery.js",
@@ -54,14 +61,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadStyles(styleFiles)
     await loadJs(jsFile1)
     //await sleep(400)
-    if(window.hideHeader != undefined && window.hideHeader ) {
+    if (window.hideHeader != undefined && window.hideHeader) {
     } else {
         loadNavigation()
     }
-    
+
     await loadJs(jsFile2)
     //await sleep(200)
     await loadJs(jsFile3)
+    await getLoginUser()
     await sleep(200)
     if (startWork != undefined) {
         startWork()
@@ -91,6 +99,14 @@ function createStyleNode(url) {
     link.rel = "stylesheet";
     link.href = url;
     return link
+}
+
+async function getLoginUser() {
+    let result = await axios.get('/user')
+    if (result.data.code === 0) {
+        window.USER = result.data.data
+        $('#username').html(window.USER.name + '<span class="caret"></span>')
+    }
 }
 
 /*

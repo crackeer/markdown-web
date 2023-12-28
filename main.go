@@ -48,14 +48,17 @@ func main() {
 	router.POST("/login", ginHelper.DoResponseJSON(), Login)
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
-	router.POST("/delete/:table/:id", ginHelper.DoResponseJSON(), deleteData)
-	router.POST("/create/:table", ginHelper.DoResponseJSON(), createData)
-	router.POST("/modify/:table/:id", ginHelper.DoResponseJSON(), modifyData)
-	router.GET("/query/:table", ginHelper.DoResponseJSON(), queryData)
-	router.GET("/distinct/:table/:colum", ginHelper.DoResponseJSON(), distinctData)
-	router.GET("/code/language", ginHelper.DoResponseJSON(), func(ctx *gin.Context) {
+	wrapperRouter := router.Group("", checkAPILogin, ginHelper.DoResponseJSON())
+	wrapperRouter.GET("/user", getUser)
+	wrapperRouter.POST("/delete/:table/:id", deleteData)
+	wrapperRouter.POST("/create/:table", createData)
+	wrapperRouter.POST("/modify/:table/:id", modifyData)
+	wrapperRouter.GET("/query/:table", queryData)
+	wrapperRouter.GET("/distinct/:table/:colum", distinctData)
+	wrapperRouter.GET("/code/language", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, cfg.CodeLanguage)
 	})
+	router.Use(checkLogin)
 	router.NoRoute(createStaticHandler(http.Dir("./resources")))
 	router.Run(fmt.Sprintf(":%d", cfg.Port))
 }
@@ -276,10 +279,6 @@ func parseUser(token string) (*User, error) {
 	return user, nil
 }
 
-func checkLogin(ctx *gin.Context) {
-
-}
-
 // Login
 //
 //	@param ctx
@@ -300,4 +299,56 @@ func Login(ctx *gin.Context) {
 	domain := getCookieDomain(ctx)
 	ctx.SetCookie(tokenKey, loginForm.Token, 3600*24*365, "/", domain, true, false)
 	ginHelper.Success(ctx, user)
+}
+
+// CheckLogin
+//
+//	@param ctx
+func checkLogin(ctx *gin.Context) {
+	if !strings.HasSuffix(ctx.Request.URL.Path, ".html") || strings.HasSuffix(ctx.Request.URL.Path, "login.html") {
+		return
+	}
+
+	redirectLogin := func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusTemporaryRedirect, "/login.html?jump="+ctx.Request.URL.Path)
+		ctx.Abort()
+	}
+
+	token, err := ctx.Cookie(tokenKey)
+	if err != nil {
+		redirectLogin(ctx)
+		return
+	}
+	_, err = parseUser(token)
+	if err != nil {
+		redirectLogin(ctx)
+		return
+	}
+
+}
+
+// CheckAPILogin
+//
+//	@param ctx
+func checkAPILogin(ctx *gin.Context) {
+	token, err := ctx.Cookie(tokenKey)
+	if err != nil {
+		ginHelper.Failure(ctx, -100, "user not login")
+		return
+	}
+	loginUser, err := parseUser(token)
+	if err != nil {
+		ginHelper.Failure(ctx, -100, "user not login")
+		return
+	}
+	ctx.Set("CurrentUser", loginUser)
+}
+
+func getUser(ctx *gin.Context) {
+
+	value, exists := ctx.Get("CurrentUser")
+	if exists {
+		ginHelper.Success(ctx, value)
+	}
+
 }

@@ -142,12 +142,12 @@ function setEditorType(editorType) {
 
 
 function initMarkdownEditor(target, value, callback) {
-    if(window.byteEditor != undefined) {
+    if (window.byteEditor != undefined) {
         window.byteEditor.$set({ value: value });
         return
     }
     setTimeout(() => {
-         window.byteEditor = new bytemd.Editor({
+        window.byteEditor = new bytemd.Editor({
             target: document.getElementById(target),
             props: {
                 value: value,
@@ -163,7 +163,7 @@ function initMarkdownEditor(target, value, callback) {
             window.byteEditorValue = e.detail.value;
         });
     }, 200)
-   
+
 }
 function getMarkdownValue() {
     return window.byteEditorValue
