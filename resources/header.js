@@ -103,20 +103,16 @@ function createStyleNode(url) {
 
 async function getLoginUser() {
     let result = await axios.get('/user')
-    if (result.data.code === 0) {
-        window.USER = result.data.data
+    console.log(result);
+    let data = result.data;
+    if (data.code === 0 && data.data != null && data.data.name !=  undefined) {
+        window.USER = data.data
         $('#username').html(window.USER.name + '<span class="caret"></span>')
+    } else if (window.location.pathname.indexOf('login.html') < 0 ){
+        window.location.href = "/login.html"
     }
 }
 
-/*
-async function loadJs(urls) {
-    var head = document.getElementsByTagName("head")[0];
-    for (var i = 0; i < urls.length; i++) {
-        head.appendChild(createJsNode(urls[i]));
-    }
-}
-*/
 
 async function loadJs(urls) {
     //var head = document.getElementsByTagName("head")[0];

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -48,8 +49,11 @@ func main() {
 	router.POST("/login", ginHelper.DoResponseJSON(), Login)
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
+	router.GET("/logout", logout)
 	wrapperRouter := router.Group("", checkAPILogin, ginHelper.DoResponseJSON())
-	wrapperRouter.GET("/user", getUser)
+	wrapperRouter.GET("/user", func(ctx *gin.Context) {
+		ginHelper.Success(ctx, getCurrentUser(ctx))
+	})
 	wrapperRouter.POST("/delete/:table/:id", deleteData)
 	wrapperRouter.POST("/create/:table", createData)
 	wrapperRouter.POST("/modify/:table/:id", modifyData)
@@ -109,6 +113,7 @@ type Markdown struct {
 	Title    string    `json:"title"`
 	Content  string    `json:"content"`
 	Category string    `json:"category"`
+	Username string    `json:"username"`
 	CreateAt time.Time `json:"create_at"`
 	ModifyAt time.Time `json:"modify_at"`
 }
@@ -122,6 +127,7 @@ type Bookmark struct {
 	Title    string    `json:"title"`
 	Link     string    `json:"link"`
 	Category string    `json:"category"`
+	Username string    `json:"username"`
 	CreateAt time.Time `json:"create_at"`
 	ModifyAt time.Time `json:"modify_at"`
 }
@@ -135,6 +141,7 @@ type Code struct {
 	Title    string    `json:"title"`
 	Content  string    `json:"content"`
 	Language string    `json:"language"`
+	Username string    `json:"username"`
 	CreateAt time.Time `json:"create_at"`
 	ModifyAt time.Time `json:"modify_at"`
 }
@@ -160,10 +167,14 @@ func deleteData(ctx *gin.Context) {
 
 func createData(ctx *gin.Context) {
 	var (
-		table string = getTable(ctx)
-		err   error
-		value interface{}
+		table    string = getTable(ctx)
+		err      error
+		value    interface{}
+		username string
 	)
+	if user := getCurrentUser(ctx); user != nil {
+		username = user.Name
+	}
 	switch table {
 	case "markdown":
 		value, err = bindMarkdown(ctx)
@@ -175,6 +186,13 @@ func createData(ctx *gin.Context) {
 	if err != nil {
 		ginHelper.Failure(ctx, -1, err.Error())
 		return
+	}
+	originValue := reflect.ValueOf(value)
+	if originValue.Kind() == reflect.Ptr {
+		originValue = originValue.Elem()
+	}
+	if tmp := originValue.FieldByName("Username"); tmp.CanSet() {
+		tmp.SetString(username)
 	}
 	result := globalDB.Create(value)
 	if result.Error != nil {
@@ -229,7 +247,9 @@ func queryData(ctx *gin.Context) {
 		list []map[string]interface{}
 	)
 	query := ginHelper.AllGetParams(ctx)
-
+	if user := getCurrentUser(ctx); user != nil {
+		query["username"] = user.Name
+	}
 	globalDB.Table(getTable(ctx)).Where(query).Order("id desc").Find(&list)
 	ginHelper.Success(ctx, list)
 }
@@ -239,6 +259,9 @@ func distinctData(ctx *gin.Context) {
 		list []interface{}
 	)
 	query := ginHelper.AllGetParams(ctx)
+	if user := getCurrentUser(ctx); user != nil {
+		query["username"] = user.Name
+	}
 	colum := getColum(ctx)
 
 	globalDB.Table(getTable(ctx)).Where(query).Distinct(colum).Find(&list)
@@ -262,8 +285,7 @@ type LoginForm struct {
 
 // User
 type User struct {
-	Name     string `json:"name"`
-	Nickname string `json:"nickname"`
+	Name string `json:"name"`
 }
 
 func parseUser(token string) (*User, error) {
@@ -344,11 +366,20 @@ func checkAPILogin(ctx *gin.Context) {
 	ctx.Set("CurrentUser", loginUser)
 }
 
-func getUser(ctx *gin.Context) {
-
+func getCurrentUser(ctx *gin.Context) *User {
 	value, exists := ctx.Get("CurrentUser")
-	if exists {
-		ginHelper.Success(ctx, value)
+	if !exists {
+		return nil
 	}
 
+	if user, ok := value.(*User); ok {
+		return user
+	}
+	return nil
+}
+
+func logout(ctx *gin.Context) {
+	domain := getCookieDomain(ctx)
+	ctx.SetCookie(tokenKey, "", -1, "/", domain, true, false)
+	ctx.Redirect(http.StatusTemporaryRedirect, "/")
 }
