@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -57,11 +58,13 @@ func main() {
 	wrapperRouter.POST("/delete/:table/:id", deleteData)
 	wrapperRouter.POST("/create/:table", createData)
 	wrapperRouter.POST("/modify/:table/:id", modifyData)
+	wrapperRouter.POST("/share/:table/:id", shareData)
 	wrapperRouter.GET("/query/:table", queryData)
 	wrapperRouter.GET("/distinct/:table/:colum", distinctData)
 	wrapperRouter.GET("/code/language", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, cfg.CodeLanguage)
 	})
+	wrapperRouter.GET("/share/data", getShareData)
 	router.Use(checkLogin)
 	router.NoRoute(createStaticHandler(http.Dir("./resources")))
 	router.Run(fmt.Sprintf(":%d", cfg.Port))
@@ -109,13 +112,13 @@ func getDataID(ctx *gin.Context) int64 {
 }
 
 type Markdown struct {
-	ID       int64     `json:"id"`
-	Title    string    `json:"title"`
-	Content  string    `json:"content"`
-	Category string    `json:"category"`
-	Username string    `json:"username"`
-	CreateAt time.Time `json:"create_at"`
-	ModifyAt time.Time `json:"modify_at"`
+	ID       int64  `json:"id"`
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	Category string `json:"category"`
+	Username string `json:"username"`
+	CreateAt int64  `json:"create_at"`
+	ModifyAt int64  `json:"modify_at"`
 }
 
 func (Markdown) TableName() string {
@@ -123,13 +126,13 @@ func (Markdown) TableName() string {
 }
 
 type Bookmark struct {
-	ID       int64     `json:"id"`
-	Title    string    `json:"title"`
-	Link     string    `json:"link"`
-	Category string    `json:"category"`
-	Username string    `json:"username"`
-	CreateAt time.Time `json:"create_at"`
-	ModifyAt time.Time `json:"modify_at"`
+	ID       int64  `json:"id"`
+	Title    string `json:"title"`
+	Link     string `json:"link"`
+	Category string `json:"category"`
+	Username string `json:"username"`
+	CreateAt int64  `json:"create_at"`
+	ModifyAt int64  `json:"modify_at"`
 }
 
 func (Bookmark) TableName() string {
@@ -148,6 +151,18 @@ type Code struct {
 
 func (Code) TableName() string {
 	return "code"
+}
+
+type Share struct {
+	ID       int64  `json:"id"`
+	Code     string `json:"code"`
+	Table    string `json:"table"`
+	DataID   int64  `json:"data_id"`
+	CreateAt int64  `json:"create_at"`
+}
+
+func (Share) TableName() string {
+	return "share"
 }
 
 func deleteData(ctx *gin.Context) {
@@ -193,6 +208,12 @@ func createData(ctx *gin.Context) {
 	}
 	if tmp := originValue.FieldByName("Username"); tmp.CanSet() {
 		tmp.SetString(username)
+	}
+	if tmp := originValue.FieldByName("CreateAt"); tmp.IsValid() && tmp.CanSet() {
+		tmp.SetInt(time.Now().Unix())
+	}
+	if tmp := originValue.FieldByName("ModifyAt"); tmp.IsValid() && tmp.CanSet() {
+		tmp.SetInt(time.Now().Unix())
 	}
 	result := globalDB.Create(value)
 	if result.Error != nil {
@@ -266,6 +287,55 @@ func distinctData(ctx *gin.Context) {
 
 	globalDB.Table(getTable(ctx)).Where(query).Distinct(colum).Find(&list)
 	ginHelper.Success(ctx, list)
+}
+
+func shareData(ctx *gin.Context) {
+	var generateShareCode = func(length int) string {
+		var charset string = strings.ToLower("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+		b := make([]byte, length)
+		for i := range b {
+			b[i] = charset[rand.Intn(len(charset))]
+		}
+		return string(b)
+	}
+	share := &Share{
+		Table:    getTable(ctx),
+		DataID:   getDataID(ctx),
+		CreateAt: time.Now().Unix(),
+		Code:     generateShareCode(8),
+	}
+	if err := globalDB.Create(share).Error; err != nil {
+		ginHelper.Failure(ctx, -1, err.Error())
+		return
+	}
+	ginHelper.Success(ctx, map[string]interface{}{
+		"share_code": share.Code,
+		"link":       "/share.html?share_code=" + share.Code,
+	})
+}
+
+func getShareData(ctx *gin.Context) {
+	shareCode := ctx.DefaultQuery("code", "")
+	if len(shareCode) < 1 {
+		ginHelper.Failure(ctx, -1, "code is empty")
+		return
+	}
+	data := &Share{}
+	globalDB.Where("code = ?", shareCode).Order("id desc").First(data)
+	if data.ID < 1 {
+		ginHelper.Failure(ctx, -1, "share not exists")
+		return
+	}
+	shareData := map[string]interface{}{}
+	globalDB.Table(data.Table).Where("id = ?", data.DataID).First(&shareData)
+	if len(shareData) < 1 {
+		ginHelper.Failure(ctx, -1, "share data not exists")
+		return
+	}
+	ginHelper.Success(ctx, map[string]interface{}{
+		"code": shareCode,
+		"data": shareData,
+	})
 }
 
 func getCookieDomain(ctx *gin.Context) string {

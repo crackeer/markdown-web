@@ -4,8 +4,8 @@ CREATE TABLE markdown(
    content TEXT NOT NULL,
    category TEXT NOT NULL,
    username TEXT NOT NULL,
-   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   create_at INTEGER DEFAULT '0',
+   modify_at INTEGER DEFAULT '0'
 );
 
 CREATE TABLE bookmark(
@@ -14,8 +14,8 @@ CREATE TABLE bookmark(
    link TEXT NOT NULL,
    category TEXT NOT NULL,
    username TEXT NOT NULL,
-   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   create_at INTEGER DEFAULT '0',
+   modify_at INTEGER DEFAULT '0'
 );
 
 CREATE TABLE code(
@@ -24,6 +24,14 @@ CREATE TABLE code(
    language TEXT NOT NULL,
    content TEXT NOT NULL,
    username TEXT NOT NULL,
-   create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   modify_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   create_at INTEGER DEFAULT '0',
+   modify_at INTEGER DEFAULT '0'
+);
+
+CREATE TABLE share(
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   `table` TEXT NOT NULL,
+   data_id TEXT NOT NULL,
+   code TEXT NOT NULL,
+   create_at INTEGER DEFAULT '0'
 );
