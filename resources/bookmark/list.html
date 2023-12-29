@@ -28,13 +28,14 @@
         </div>
 
         <div style="position: sticky; top: 0;  padding:10px; z-index: 1000; text-align: center; background-color: #f5f5f5; font-size: 18px;margin-bottom: 10px; opacity: 0.8;"
-            v-if="mode == ''" class="link-list">
+            v-if="mode == '' && list.length > 0" class="link-list">
             <template v-for="item in list">
                 <a :href="'#' + item.category">
                     {{item.category}}
                 </a>
             </template>
         </div>
+        
 
         <template v-for="item in list" v-if="mode.length < 1">
             <div :id="item.category">

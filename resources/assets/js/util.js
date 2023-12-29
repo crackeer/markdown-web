@@ -146,6 +146,7 @@ function initMarkdownEditor(target, value, callback) {
         window.byteEditor.$set({ value: value });
         return
     }
+   
     setTimeout(() => {
         window.byteEditor = new bytemd.Editor({
             target: document.getElementById(target),
@@ -156,6 +157,7 @@ function initMarkdownEditor(target, value, callback) {
                 ],
             },
         });
+       
         window.byteEditor.$on('change', (e) => {
             console.log(e.detail.value)
             window.byteEditor.$set({ value: e.detail.value });
