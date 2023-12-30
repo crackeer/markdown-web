@@ -48,6 +48,7 @@ func main() {
 	}
 	router := gin.New()
 	router.POST("/login", ginHelper.DoResponseJSON(), Login)
+	router.GET("/share/data", ginHelper.DoResponseJSON(), getShareData)
 	router.RedirectFixedPath = false
 	router.RedirectTrailingSlash = false
 	router.GET("/logout", logout)
@@ -64,7 +65,7 @@ func main() {
 	wrapperRouter.GET("/code/language", func(ctx *gin.Context) {
 		ginHelper.Success(ctx, cfg.CodeLanguage)
 	})
-	wrapperRouter.GET("/share/data", getShareData)
+
 	router.Use(checkLogin)
 	router.NoRoute(createStaticHandler(http.Dir("./resources")))
 	router.Run(fmt.Sprintf(":%d", cfg.Port))
@@ -153,12 +154,14 @@ func (Code) TableName() string {
 	return "code"
 }
 
+// Share
 type Share struct {
 	ID       int64  `json:"id"`
 	Code     string `json:"code"`
 	Table    string `json:"table"`
 	DataID   int64  `json:"data_id"`
 	CreateAt int64  `json:"create_at"`
+	ExpireAt int64  `json:"expire_at"`
 }
 
 func (Share) TableName() string {
@@ -298,11 +301,22 @@ func shareData(ctx *gin.Context) {
 		}
 		return string(b)
 	}
+	var post struct {
+		Duration int64 `json:"duration"`
+	}
+	bytes, _ := ctx.GetRawData()
+	if err := json.Unmarshal(bytes, &post); err != nil {
+		post.Duration = -1
+	}
+
 	share := &Share{
 		Table:    getTable(ctx),
 		DataID:   getDataID(ctx),
 		CreateAt: time.Now().Unix(),
 		Code:     generateShareCode(8),
+	}
+	if post.Duration > 0 {
+		share.ExpireAt = post.Duration + share.CreateAt
 	}
 	if err := globalDB.Create(share).Error; err != nil {
 		ginHelper.Failure(ctx, -1, err.Error())
@@ -315,26 +329,32 @@ func shareData(ctx *gin.Context) {
 }
 
 func getShareData(ctx *gin.Context) {
-	shareCode := ctx.DefaultQuery("code", "")
+	shareCode := ctx.DefaultQuery("share_code", "")
 	if len(shareCode) < 1 {
-		ginHelper.Failure(ctx, -1, "code is empty")
+		ginHelper.Failure(ctx, -1, "分享不存在")
 		return
 	}
 	data := &Share{}
 	globalDB.Where("code = ?", shareCode).Order("id desc").First(data)
 	if data.ID < 1 {
-		ginHelper.Failure(ctx, -1, "share not exists")
+		ginHelper.Failure(ctx, -1, "分享不存在")
 		return
 	}
-	shareData := map[string]interface{}{}
-	globalDB.Table(data.Table).Where("id = ?", data.DataID).First(&shareData)
+	if data.ExpireAt > 0 && data.ExpireAt < time.Now().Unix() {
+		ginHelper.Failure(ctx, -1, "你来晚了，该分享已过期")
+		return
+	}
+	shareData := []map[string]interface{}{}
+	globalDB.Table(data.Table).Where("id = ?", data.DataID).Order("id desc").Find(&shareData)
 	if len(shareData) < 1 {
-		ginHelper.Failure(ctx, -1, "share data not exists")
+		ginHelper.Failure(ctx, -1, "分享不存在")
 		return
 	}
 	ginHelper.Success(ctx, map[string]interface{}{
-		"code": shareCode,
-		"data": shareData,
+		"code":      shareCode,
+		"table":     data.Table,
+		"expire_at": data.ExpireAt,
+		"data":      shareData[0],
 	})
 }
 
@@ -397,7 +417,7 @@ func Login(ctx *gin.Context) {
 //
 //	@param ctx
 func checkLogin(ctx *gin.Context) {
-	if !strings.HasSuffix(ctx.Request.URL.Path, ".html") || strings.HasSuffix(ctx.Request.URL.Path, "login.html") {
+	if !strings.HasSuffix(ctx.Request.URL.Path, ".html") || strings.HasSuffix(ctx.Request.URL.Path, "login.html") || strings.HasSuffix(ctx.Request.URL.Path, "share.html") {
 		return
 	}
 

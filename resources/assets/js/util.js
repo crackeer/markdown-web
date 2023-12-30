@@ -201,3 +201,7 @@ function initCodeEditor(target, lang, value) {
 function getCodeEditorHeight() {
     return window.screen.height - 300
 }
+
+function formatUnixTime(ts) {
+    return dayjs.unix(ts).format('YYYY-MM-DD HH:mm:ss')
+}

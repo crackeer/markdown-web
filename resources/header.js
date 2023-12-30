@@ -102,14 +102,16 @@ function createStyleNode(url) {
 }
 
 async function getLoginUser() {
+    if (window.location.pathname.indexOf('login.html') > -1 ||  window.location.pathname.indexOf('share.html') > -1) {
+        return
+    }
+
     let result = await axios.get('/user')
     console.log(result);
     let data = result.data;
     if (data.code === 0 && data.data != null && data.data.name !=  undefined) {
         window.USER = data.data
         $('#username').html(window.USER.name + '<span class="caret"></span>')
-    } else if (window.location.pathname.indexOf('login.html') < 0 ){
-        window.location.href = "/login.html"
     }
 }
 

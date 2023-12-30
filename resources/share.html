@@ -1,0 +1,78 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>分享</title>
+    <script type="text/javascript"> window.hideHeader = true</script>
+    <script src="/header.js"></script>
+</head>
+
+<body>
+    <div id="app"></div>
+    <template id="template">
+        <div class="alert alert-warning" role="alert" v-if="share_code.length < 1" style="margin-top: 20%;">
+            <h3>分享链接有误</h3>
+        </div>
+
+        <div class="alert alert-warning" role="alert" v-if="data.code != undefined && data.code < 0"
+            style="margin-top: 20%;">
+            <h3>{{data.message}}</h3>
+        </div>
+
+        <div v-if="data.code != undefined && data.code ==0">
+            <div v-if="data.data.table == 'markdown'" style="text-align: center;">
+                <h2>{{data.data.data.title}}</h2>
+                <p style="font-size: 18px;"><span class="label label-info" aria-hidden="true">过期时间：{{expireTime}}</span></p>
+                <hr />
+            </div>
+        </div>
+        <div id="markdown"></div>
+    </template>
+    <script>
+
+        function startWork() {
+            var vm = Vue.createApp({
+                data() {
+                    return {
+                        share_code: '',
+                        data: {},
+                        expireTime : ''
+                    }
+                },
+                template: '#template',
+                async mounted() {
+                    this.share_code = getQuery('share_code', '')
+                    this.getShareData()
+                },
+                methods: {
+                    async getShareData() {
+                        if (this.share_code.length < 1) {
+                            return
+                        }
+                        let result = await axios.get('/share/data?share_code=' + this.share_code)
+                        this.data = result.data
+                        if (this.data.code == 0) {
+                            this.renderShare(this.data.data.table, this.data.data.data)
+                            if(this.data.data.expire_at < 1) {
+                                this.expireTime = "永久"
+                            } else {
+                                this.expireTime = formatUnixTime(this.data.data.expire_at)
+                            }
+                        }
+                    },
+                    async renderShare(table, data) {
+                        if (table == 'markdown') {
+                            document.title = "分享:" + data.title
+                            initMarkdownPreview('markdown', data.content)
+                        }
+                    }
+                }
+            })
+            vm.mount('#app')
+        }
+    </script>
+</body>
+
+</html>

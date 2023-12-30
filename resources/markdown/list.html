@@ -100,11 +100,11 @@
                         }
                     },
                     async showShareModal(item) {
-
                         bootbox.prompt({
                             title: "确认分享`" + item.title + "`？请选择时长",
                             message: "确认分享`" + item.title + "`？请选择时长",
                             inputType: 'select',
+                            value : 90 * 24 * 3600,
                             inputOptions: [{
                                 text: '1天',
                                 value: 24 * 3600
@@ -121,8 +121,8 @@
                                 text: '永久',
                                 value: -1
                             }],
-                            callback: function (result) {
-                                console.log(result);
+                            callback:  (result) => {
+                                this.doShareMarkdown(item.id, result)
                             }
                         });
                         /*
@@ -132,8 +132,10 @@
                     }
                 })*/
                     },
-                    async doShareMarkdown(id) {
-                        let result = await axios.post('/share/markdown/' + id)
+                    async doShareMarkdown(id, duration) {
+                        let result = await axios.post('/share/markdown/' + id, {
+                            duration : parseInt(duration)
+                        })
                         if (result.data.code < 0) {
                             bootbox.alert(result.data.message,)
                         } else {
