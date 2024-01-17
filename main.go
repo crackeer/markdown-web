@@ -28,6 +28,7 @@ type AppConfig struct {
 	Database             string   `env:"DATABASE"`
 	CodeLanguage         []string `env:"CODE_LANGUAGE" envSeparator:","`
 	UserProfileDirectory string   `env:"USER_PROFILE_DIRECTORY"`
+	Domain               string   `env:"DOMAIN`
 }
 
 var (
@@ -359,8 +360,14 @@ func getShareData(ctx *gin.Context) {
 }
 
 func getCookieDomain(ctx *gin.Context) string {
+	if len(cfg.Domain) > 0 {
+		return cfg.Domain
+	}
 	if ctx == nil {
 		return ""
+	}
+	if headerHost := ctx.Request.Header.Get("HOST"); len(headerHost) > 0 {
+		return headerHost
 	}
 	host := ctx.Request.Host
 	if strings.Contains(host, ":") {
