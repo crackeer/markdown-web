@@ -416,7 +416,7 @@ func Login(ctx *gin.Context) {
 	}
 
 	domain := getCookieDomain(ctx)
-	ctx.SetCookie(tokenKey, loginForm.Token, 3600*24*365, "/", domain, true, false)
+	ctx.SetCookie(tokenKey, loginForm.Token, 3600*24*365, "/", domain, false, true)
 	ginHelper.Success(ctx, user)
 }
 
