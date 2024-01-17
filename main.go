@@ -366,7 +366,7 @@ func getCookieDomain(ctx *gin.Context) string {
 	if ctx == nil {
 		return ""
 	}
-	if headerHost := ctx.Request.Header.Get("HOST"); len(headerHost) > 0 {
+	if headerHost := ctx.Request.Header.Get("Host"); len(headerHost) > 0 {
 		return headerHost
 	}
 	host := ctx.Request.Host
