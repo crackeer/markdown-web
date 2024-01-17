@@ -28,7 +28,7 @@ type AppConfig struct {
 	Database             string   `env:"DATABASE"`
 	CodeLanguage         []string `env:"CODE_LANGUAGE" envSeparator:","`
 	UserProfileDirectory string   `env:"USER_PROFILE_DIRECTORY"`
-	Domain               string   `env:"DOMAIN`
+	Domain               string   `env:"DOMAIN"`
 }
 
 var (
