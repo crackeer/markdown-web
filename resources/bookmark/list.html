@@ -35,15 +35,15 @@
                 </a>
             </template>
         </div>
-        
+
 
         <template v-for="item in list" v-if="mode.length < 1">
             <div :id="item.category">
-                <div class="panel panel-default">
-                    <div class="panel-heading" :id="item.category" style="font-size: 16px;">
+                <div class="card">
+                    <div class="card-header" :id="item.category" style="font-size: 16px;">
                         <strong>{{item.category}}({{item.list.length}})</strong>
                     </div>
-                    <div class="panel-body">
+                    <div class="card-body">
                         <div class="row">
                             <template v-for="item2 in item.list" v-if="mode == ''">
                                 <div class="col-xs-6 col-md-3">
@@ -59,24 +59,25 @@
         </template>
 
         <template v-for="item in list" v-if="mode == 'edit'">
-            <div class="panel panel-default">
-                <div class="panel-heading" style="font-size: 16px;">
+            <div class="card panel-default">
+                <div class="card-header" style="font-size: 16px;">
                     <strong>{{item.category}} · {{item.list.length}}</strong>
                 </div>
-                <div class="panel-body">
-                    <div class="btn-group btn-group-xs" role="group">
-                        <button type="button" class="btn btn-default" @click="selectAll(item)">全选</button>
-                        <button type="button" class="btn btn-default" @click="deselectAll(item)">全不选</button>
+                <div class="card-body">
+                    <div class="btn-group pb-1" role="group">
+                        <button type="button" class="btn btn-primary" @click="selectAll(item)">全选</button>
+                        <button type="button" class="btn btn-primary" @click="deselectAll(item)">全不选</button>
                     </div>
                     <template v-for="item2 in item.list">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" :value="item2.id" v-model="selectIds"
-                                    name="selectIds">{{item2.title}}
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" :value="item2.id" v-model="selectIds">
+                            <label class="form-check-label" for="selectIds">
+                                {{item2.title}}<a @click="showEditModel(item2)" style="margin-left: 7px;"
+                                    href="javascript:;">edit</a>
                             </label>
-                            <a @click="showEditModel(item2)" style="margin-left: 7px;">
-                                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
                         </div>
+
                     </template>
                 </div>
             </div>
@@ -86,9 +87,8 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title">转移书签到</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <template v-for="item in list">
@@ -112,40 +112,33 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title">{{ this.edit ? '修改' : '新建'}}书签</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-horizontal">
-                            <div class="form-group">
-                                <label for="name" class="control-label col-sm-2">名字</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" v-model="title" placeholder="书签名字">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">名字</label>
+                            <input type="text" class="form-control" v-model="title" placeholder="书签名字">
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">链接</label>
+                            <textarea class="form-control" v-model="link" placeholder="链接" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">分类</label>
+                            <input type="text" class="form-control" v-model="category">
+                            <template v-for="item in categoryList">
+                                <div class="form-check form-check-inline pt-1">
+                                    <input class="form-check-input" type="radio" name="category" :value="item"
+                                        v-model="category" />
+                                    <label class="form-check-label" for="inlineRadio1">{{item}}</label>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="service" class="control-label col-sm-2">链接</label>
-                                <div class="col-sm-9">
-                                    <textarea class="form-control" v-model="link" placeholder="链接" rows="3"></textarea>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="env" class="control-label col-sm-2">分类</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" v-model="category">
-                                    <template v-for="item in categoryList">
-                                        <label class="radio-inline">
-                                            <input type="radio" name="category" :value="item"
-                                                v-model="category">{{item}}
-                                        </label>
-                                    </template>
-                                </div>
-                            </div>
+                            </template>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
                         <button type="button" class="btn btn-primary" @click="doUpdateBookmark()">保存</button>
                     </div>
                 </div>
@@ -173,12 +166,7 @@
                 template: '#template',
                 async mounted() {
                     this.getList()
-                    $('#affix').affix({
-                      offset: {
-                        top: 100,
-                        bottom: 200
-                      }
-                    })
+
                 },
                 methods: {
                     async getCategoryList() {
@@ -212,7 +200,10 @@
                         this.link = ''
                         this.category = ''
                         this.edit = false
-                        $('#myModal').modal()
+                        const myModal = new bootstrap.Modal('#myModal', {
+                            keyboard: false
+                        })
+                        myModal.show()
                     },
                     async showEditModel(item) {
                         this.title = item.title
@@ -220,7 +211,10 @@
                         this.category = item.category
                         this.bookmark_id = item.id
                         this.edit = true
-                        $('#myModal').modal()
+                        const myModal = new bootstrap.Modal('#myModal', {
+                            keyboard: false
+                        })
+                        myModal.show()
                     },
                     async showDeleteModal(item) {
                         bootbox.confirm("确认删除`" + item.title + "`？", (result) => {

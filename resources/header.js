@@ -1,27 +1,4 @@
 var header = `
-<nav class="navbar nnavbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">首页</a>
-        <div class="collapse navbar-collapse"  id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a href="/markdown/list.html" id="markdown-a" class="nav-link">文档</a>
-                </li>
-                <li class="nav-item"><a href="/bookmark/list.html" id="bookmark-a">书签</a></li>
-                <li class="nav-item"><a href="/code/list.html" id="code-a">代码</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="username">暂无<span class="caret"></span></a>
-                    <ul class="dropdown-menu" style="z-index:10000">
-                        <li><a href="/logout">退出</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">首页</a>
@@ -40,27 +17,14 @@ var header = `
          <a href="/code/list.html" id="code-a" class="nav-link">代码</a>
         </li>
       </ul>
-       <ul class="navbar-nav">
-        <li class="dropdown-item">
-             <a class="nav-link dropdown-toggle" href="javascript:;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Dropdown
-              </a>
-                <ul class="dropdown-menu" style="z-index:10000">
-                <li><a class="dropdown-item" href="/logout">Action</a></li>
-                    <li><a href="/logout">退出</a></li>
-                </ul>
-            </li>
-        </ul>
-        <div class="dropdown">
-          <a class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <div class="dropdown">
+          <a class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="username">
             Dropdown button
           </a>
           <ul class="dropdown-menu" style="z-index:10000">
-            <li><a class="dropdown-item" href="/logout">Action</a></li>
-            <li><a class="dropdown-item" href="#">Another action</a></li>
-            <li><a class="dropdown-item" href="#">Something else here</a></li>
+            <li><a class="dropdown-item" href="/logout">退出</a></li>
           </ul>
-        </div>
+      </div>
     </div>
   </div>
 </nav>

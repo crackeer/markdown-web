@@ -13,29 +13,27 @@
 <body>
     <div id="app"></div>
     <template id="template">
-        <div class="form-horizontal">
-            <div class="form-group">
-                <label for="title" class="col-sm-1 control-label">标题</label>
-                <div class="col-sm-6">
-                    <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
-                </div>
-                <div class="col-md-3">
-                    <button class="btn btn-primary" @click="updateMarkdown">更新</button>
-                </div>
-
+        <div class="row g-3 align-items-center" style="margin-top: 7px;">
+            <label for="title" class="col-form-label col-sm-1 text-end">标题</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
             </div>
-            <div class="form-group">
-                <label for="title" class="col-sm-1 control-label">分类</label>
-                <div class="col-sm-9">
-                    <label class="radio-inline" v-for="(item, i) in categoryList">
-                        <input type="radio" name="category" :value="item" v-model="category">{{item}}
-                    </label>
-                    <label class="radio-inline">
-                        <a  href="javascript:;" @click="addCategory()">
-                            增加
-                        </a>
-                    </label>
-                </div>
+            <div class="col-auto">
+                <button class="btn btn-primary" @click="createMarkdown">提交</button>
+            </div>
+        </div>
+        <div class="row g-3 align-items-center" style="margin-top: 0px; margin-bottom: 10px;">
+            <label for="category" class="col-form-label col-sm-1 text-end">分类</label>
+            <div class="col-sm-6">
+                <template v-for="(item, i) in categoryList">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="category" :value="item" v-model="category" />
+                        <label class="form-check-label" for="inlineRadio1">{{item}}</label>
+                    </div>
+                </template>
+                <a href="javascript:;" @click="addCategory()">
+                    增加
+                </a>
             </div>
         </div>
         

@@ -1,5 +1,5 @@
 body {
-    padding: 0px 7.5% 50px;
+    padding: 10px 7.5% 50px;
     font-family: 'Georgia,serif';
 }
 
@@ -42,12 +42,6 @@ textarea {
     -o-transition: border .2s ease-in-out;
     transition: border .2s ease-in-out
 }
-
-.navbar {
-    margin-bottom: 7px!important;
-    min-height: 0;
-    border:0px;
-}
-.page-header {
-    margin-top: 5px!important;
+a {
+    text-decoration: none!important;
 }

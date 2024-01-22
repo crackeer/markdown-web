@@ -12,17 +12,22 @@
 <body>
     <div id="app"></div>
     <template id="template">
-        <div>
-            <label class="radio-inline">
-                <input type="radio" name="category" value="all" v-model="category" @change="selectClassify('all')">全部
-            </label>
-            <label class="radio-inline" v-for="(item, i) in categoryList">
-                <input type="radio" name="category" :value="item" v-model="category"
-                    @change="selectClassify(item)">{{item}}
-            </label>
-            <a class="btn btn-link" href="/markdown/create.html">
-                新建
-            </a>
+        <div class="row g-3 align-items-center" style="margin: 7px 0;">
+            <div class="col-12">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="category" value="all" @change="selectClassify('all')" v-model="category"/>
+                    <label class="form-check-label" for="inlineRadio1">全部</label>
+                </div>
+                <template v-for="(item, i) in categoryList">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="category" :value="item" @change="selectClassify(item)" v-model="category"/>
+                        <label class="form-check-label" for="inlineRadio1">{{item}}</label>
+                    </div>
+                </template>
+                <a class="btn btn-outline-primary btn-sm" href="/markdown/create.html">
+                    创建
+                </a>
+            </div>
         </div>
 
         <table class="table table-striped table-bordered table-condensed">
