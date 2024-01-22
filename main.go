@@ -142,13 +142,13 @@ func (Bookmark) TableName() string {
 }
 
 type Code struct {
-	ID       int64     `json:"id"`
-	Title    string    `json:"title"`
-	Content  string    `json:"content"`
-	Language string    `json:"language"`
-	Username string    `json:"username"`
-	CreateAt time.Time `json:"create_at"`
-	ModifyAt time.Time `json:"modify_at"`
+	ID       int64  `json:"id"`
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	Language string `json:"language"`
+	Username string `json:"username"`
+	CreateAt int64  `json:"create_at"`
+	ModifyAt int64  `json:"modify_at"`
 }
 
 func (Code) TableName() string {

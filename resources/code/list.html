@@ -11,19 +11,25 @@
 <body>
     <div id="app"></div>
     <template id="template">
-        <div>
-            <label class="radio-inline">
-                <input type="radio" name="language" value="" v-model="language"
-                    @change="selectLanguage('')">全部
-            </label>
-            <label class="radio-inline" v-for="(item, i) in languageList">
-                <input type="radio" name="language" :value="item" v-model="language"
-                    @change="selectLanguage(item)">{{item}}
-            </label>
-            <a class="btn btn-link" :href="'/code/create.html?language=' + language">
-                新建
-            </a>
+
+        <div class="row g-3 align-items-center" style="margin: 7px 0;">
+            <div class="col-12">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="language" value="" @change="selectLanguage('')" v-model="language"/>
+                    <label class="form-check-label" for="inlineRadio1">全部</label>
+                </div>
+                <template v-for="(item, i) in languageList">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="language" :value="item" @change="selectLanguage(item)" v-model="language"/>
+                        <label class="form-check-label" for="inlineRadio1">{{item}}</label>
+                    </div>
+                </template>
+                <a class="btn btn-outline-primary btn-sm" :href="'/code/create.html?language=' + language">
+                    创建
+                </a>
+            </div>
         </div>
+
         <table class="table table-striped  table-bordered table-condensed">
             <thead>
                 <tr>
