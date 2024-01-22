@@ -1,22 +1,14 @@
 var header = `
-<nav class="navbar navbar-default">
+<nav class="navbar nnavbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                data-target="#navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">
-              首页
-            </a>
-        </div>
-        <div class="collapse navbar-collapse" id="navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li><a href="/markdown/list.html" id="markdown-a">文档</a></li>
-                <li><a href="/bookmark/list.html" id="bookmark-a">书签</a></li>
-                <li><a href="/code/list.html" id="code-a">代码</a></li>
+        <a class="navbar-brand" href="/">首页</a>
+        <div class="collapse navbar-collapse"  id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a href="/markdown/list.html" id="markdown-a" class="nav-link">文档</a>
+                </li>
+                <li class="nav-item"><a href="/bookmark/list.html" id="bookmark-a">书签</a></li>
+                <li class="nav-item"><a href="/code/list.html" id="code-a">代码</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
@@ -29,10 +21,53 @@ var header = `
         </div>
     </div>
 </nav>
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">首页</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a href="/markdown/list.html" id="markdown-a" class="nav-link">文档</a>
+        </li>
+        <li class="nav-item">
+            <a href="/bookmark/list.html" id="bookmark-a" class="nav-link">书签</a>
+        </li>
+        <li class="nav-item">
+         <a href="/code/list.html" id="code-a" class="nav-link">代码</a>
+        </li>
+      </ul>
+       <ul class="navbar-nav">
+        <li class="dropdown-item">
+             <a class="nav-link dropdown-toggle" href="javascript:;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Dropdown
+              </a>
+                <ul class="dropdown-menu" style="z-index:10000">
+                <li><a class="dropdown-item" href="/logout">Action</a></li>
+                    <li><a href="/logout">退出</a></li>
+                </ul>
+            </li>
+        </ul>
+        <div class="dropdown">
+          <a class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Dropdown button
+          </a>
+          <ul class="dropdown-menu" style="z-index:10000">
+            <li><a class="dropdown-item" href="/logout">Action</a></li>
+            <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+        </div>
+    </div>
+  </div>
+</nav>
 `
 
 var styleFiles = [
-    "/assets/css/bootstrap3.4.min.css",
+    "/assets/bootstrap/bootstrap.min.css",
     "/assets/css/my.css",
     "/assets/bytemd/bytemd.css",
     "/assets/bytemd/github-markdown.css",
@@ -47,8 +82,8 @@ var jsFile1 = [
     "/assets/bytemd/bytemd.umd.js",
 ]
 var jsFile2 = [
-    "/assets/js/bootstrap.min.js",
-    "/assets/js/bootbox.min.js",
+    "/assets/bootstrap/bootstrap.bundle.min.js",
+    "/assets/bootstrap/bootbox.js",
     "/assets/bytemd/bytemd-plugin-gfm.js",
     "/assets/bytemd/plugin-highlight.js",
 
