@@ -37,29 +37,6 @@ function cloneObject(data) {
     return JSON.parse(raws)
 }
 
-function parseBookmark(content) {
-    let parts = content.split("\n")
-    let list = []
-    console.log(parts)
-    for (var i in parts) {
-        if (parts[i].length > 0) {
-            let temp = parts[i].split(">")
-            if (temp.length == 1) {
-                list.push({
-                    title: temp[0],
-                    href: temp[0]
-                })
-            } else if (temp.length > 1) {
-                list.push({
-                    title: temp[1],
-                    href: temp[0]
-                })
-            }
-        }
-    }
-    return list
-}
-
 async function uploadFile(files) {
     let retData = []
     for (var i in files) {
@@ -130,16 +107,6 @@ function readFiles(file) {
         reader.readAsDataURL(file);
     }
 }
-
-function getEditorType() {
-    return "cherry"
-    return localStorage.getItem('editor-type')
-}
-
-function setEditorType(editorType) {
-    return localStorage.setItem('editor-type', editorType)
-}
-
 
 function initMarkdownEditor(target, value, callback) {
     if (window.byteEditor != undefined) {
