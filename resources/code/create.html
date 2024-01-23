@@ -7,114 +7,94 @@
     <meta name="description" content="Description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>代码创建</title>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/pure-js-loader/loader.js"></script>
+    <script src="/framework.js"></script>
 
-    <script src="/header.js"></script>
 
-<body>
-    <div id="app"></div>
-    <template id="template">
+<body></body>
+<template id="template">
 
-        <div class="row g-3 align-items-center" style="margin-top: 7px;">
-            <label for="title" class="col-form-label col-sm-1 text-end">标题</label>
-            <div class="col-sm-6">
-                <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-primary" @click="createCode">提交</button>
-            </div>
+    <div class="row g-3 align-items-center" style="margin-top: 7px;">
+        <label for="title" class="col-form-label col-sm-1 text-end">标题</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
         </div>
-        <div class="row g-3 align-items-center" style="margin-top: 0px;margin-bottom: 10px;">
-            <label for="category" class="col-form-label col-sm-1 text-end">语言</label>
-            <div class="col-sm-6">
-                <template v-for="(item, i) in languageList">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="language" :value="item" v-model="language" @change="changeLanguage()" />
-                        <label class="form-check-label" for="inlineRadio1">{{item}}</label>
-                    </div>
-                </template>
-            </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" @click="createCode">提交</button>
         </div>
+    </div>
+    <div class="row g-3 align-items-center" style="margin-top: 0px;margin-bottom: 10px;">
+        <label for="category" class="col-form-label col-sm-1 text-end">语言</label>
+        <div class="col-sm-6">
+            <template v-for="(item, i) in languageList">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="language" :value="item" v-model="language"
+                        @change="changeLanguage()" />
+                    <label class="form-check-label" for="inlineRadio1">{{item}}</label>
+                </div>
+            </template>
+        </div>
+    </div>
 
-        <div id="container"></div>
-    </template>
+    <div id="container"></div>
+</template>
 
-    <script>
-       // var codeEditor = null;
-        /*
-        var initCodeEditor = function (lang, value) {
-            require.config({ paths: { vs: '/assets/monaco-editor/min/vs' } });
-            require(['vs/editor/editor.main'], function () {
-                codeEditor = monaco.editor.create(document.getElementById('container'), {
-                    value: value,
-                    language: lang,
-                    theme: "vs-dark",
-                    formatOnPaste: true, //是否粘贴自动格式化
-                    automaticLayout: true,
-                    height : '1000px'
-                });
-            });
-        }*/
+<script>
+    window.VueObject = {
+        data() {
+            let list = []
+            return {
+                content: '',
+                title: '',
+                language: '',
+                languageList: [],
 
-        var startWork = function () {
-            var vm = Vue.createApp({
-                data() {
-                    let list = []
-                    return {
-                        content: '',
-                        title: '',
-                        language: '',
-                        languageList: [],
-                        
-                    }
-                },
-                template: '#template',
-                async mounted() {
-                    await this.getLanguageList()
-                    let language = getQuery('language', 'go')
-                    this.language = language;
-                    setTimeout(() => {
-                        initCodeEditor("container", language, "")
-                    }, 400)
-                },
-                methods: {
-                    async getLanguageList() {
-                        let result = await axios.get('/code/language')
-                        this.languageList = result.data.data || []
-                    },
-                    changeLanguage() {
-                        monaco.editor.setModelLanguage(codeEditor.getModel(), this.language);
-                    },
-                    async createCode() {
-                        let data = {
-                            title: this.title,
-                            content:  window.codeEditor.getValue(),
-                            language: this.language,
-                        }
-                        console.log(data)
-                        if (data.title.trim().length < 1) {
-                            bootbox.alert('请输入标题')
-                            return
-                        }
-                        if (this.language.trim().length < 1) {
-                            bootbox.alert('请选择分类')
-                            return
-                        }
-                        let result = await axios.post('/create/code', data)
-                        if (result.data.code != 0) {
-                            bootbox.alert(result.data.message)
-                            return
-                        }
-                        jump('/code/detail.html', {
-                            'id': result.data.data.id,
-                        })
-
-                    }
+            }
+        },
+        template: '#template',
+        async mounted() {
+            await this.getLanguageList()
+            let language = getQuery('language', 'go')
+            this.language = language;
+            setTimeout(() => {
+                initCodeEditor("container", language, "")
+            }, 400)
+        },
+        methods: {
+            async getLanguageList() {
+                let result = await axios.get('/code/language')
+                this.languageList = result.data.data || []
+            },
+            changeLanguage() {
+                monaco.editor.setModelLanguage(codeEditor.getModel(), this.language);
+            },
+            async createCode() {
+                let data = {
+                    title: this.title,
+                    content: window.codeEditor.getValue(),
+                    language: this.language,
                 }
-            })
-            vm.mount('#app')
+                console.log(data)
+                if (data.title.trim().length < 1) {
+                    bootbox.alert('请输入标题')
+                    return
+                }
+                if (this.language.trim().length < 1) {
+                    bootbox.alert('请选择分类')
+                    return
+                }
+                let result = await axios.post('/create/code', data)
+                if (result.data.code != 0) {
+                    bootbox.alert(result.data.message)
+                    return
+                }
+                jump('/code/detail.html', {
+                    'id': result.data.data.id,
+                })
+
+            }
         }
-    </script>
-</body>
+    }
+</script>
 
 </html>

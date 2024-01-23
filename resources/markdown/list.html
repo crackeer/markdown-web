@@ -6,153 +6,148 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>文档列表</title>
 
-    <script src="/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pure-js-loader/loader.js"></script>
+    <script src="/framework.js"></script>
+
 </head>
 
-<body>
-    <div id="app"></div>
-    <template id="template">
-        <div class="row g-3 align-items-center" style="margin: 7px 0;">
-            <div class="col-12">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="category" value="all" @change="selectClassify('all')" v-model="category"/>
-                    <label class="form-check-label" for="inlineRadio1">全部</label>
-                </div>
-                <template v-for="(item, i) in categoryList">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="category" :value="item" @change="selectClassify(item)" v-model="category"/>
-                        <label class="form-check-label" for="inlineRadio1">{{item}}</label>
-                    </div>
-                </template>
-                <a class="btn btn-outline-primary btn-sm" href="/markdown/create.html">
-                    创建
-                </a>
+<body></body>
+<template id="template">
+    <div class="row g-3 align-items-center" style="margin: 7px 0;">
+        <div class="col-12">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="category" value="all" @change="selectClassify('all')"
+                    v-model="category" />
+                <label class="form-check-label" for="inlineRadio1">全部</label>
             </div>
+            <template v-for="(item, i) in categoryList">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="category" :value="item"
+                        @change="selectClassify(item)" v-model="category" />
+                    <label class="form-check-label" for="inlineRadio1">{{item}}</label>
+                </div>
+            </template>
+            <a class="btn btn-outline-primary btn-sm" href="/markdown/create.html">
+                创建
+            </a>
         </div>
+    </div>
 
-        <table class="table table-striped table-bordered table-condensed">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>标题</th>
-                    <th>分类</th>
-                    <th style="text-align:center">操作</th>
-                </tr>
-            <tbody>
-                <tr v-for="(item, i) in list">
-                    <td>{{item.id}}</td>
-                    <td><a :href="'/markdown/detail.html?id=' + item.id">{{item.title}}</a></td>
-                    <td>{{item.category}}</td>
-                    <td class="link-list" style="text-align: center;">
-                        <a :href="'/markdown/edit.html?id=' + item.id" class="a-group">编辑</a>
-                        <a href="javascript:;" @click="showDeleteModal(item)" class="a-group">删除</a>
-                        <a href="javascript:;" @click="showShareModal(item)" class="a-group">分享</a>
-                    </td>
-                </tr>
-        </table>
-    </template>
-    <script>
-        var startWork = function () {
-            var vm = Vue.createApp({
-                data() {
-                    return {
-                        category: '',
-                        categoryList: [],
-                        list: [],
-                    }
-                },
-                template: '#template',
-                async mounted() {
-                    this.category = getQuery('category', 'all')
-                    this.getCategoryList()
-                    this.getList()
-                },
-                methods: {
-                    async getCategoryList() {
-                        let result = await axios.get('/distinct/markdown/category')
-                        this.categoryList = result.data.data
-                    },
-                    async getList() {
-                        let url = "/query/markdown"
-                        if (this.category.length > 0 && this.category != 'all') {
-                            url = url + "?category=" + this.category
-                        }
-                        let result = await axios.get(url)
-                        this.list = result.data.data
-                    },
-                    async selectClassify(category) {
-                        reloadWith({
-                            category: category,
-                        })
-                    },
-                    async showDeleteModal(item) {
-                        bootbox.confirm("确认删除`" + item.title + "`？", (result) => {
-                            if (result) {
-                                this.doDeleteMarkdown(item.id)
-                            }
-                        })
-                    },
-                    async doDeleteMarkdown(id) {
-                        let result = await axios.post('/delete/markdown/' + id)
-                        if (result.data.code < 0) {
-                            bootbox.alert(result.data.message, () => {
-                                this.getList()
-                            })
-                        } else {
-                            bootbox.alert("删除成功", () => {
-                                this.getList()
-                            })
-                        }
-                    },
-                    async showShareModal(item) {
-                        bootbox.prompt({
-                            title: "确认分享`" + item.title + "`？请选择时长",
-                            message: "确认分享`" + item.title + "`？请选择时长",
-                            inputType: 'select',
-                            value : 90 * 24 * 3600,
-                            inputOptions: [{
-                                text: '1天',
-                                value: 24 * 3600
-                            },
-                            {
-                                text: '7天',
-                                value: 7 * 24 * 3600
-                            },
-                            {
-                                text: '90天',
-                                value: 90 * 24 * 3600
-                            },
-                            {
-                                text: '永久',
-                                value: -1
-                            }],
-                            callback:  (result) => {
-                                this.doShareMarkdown(item.id, result)
-                            }
-                        });
-                        /*
-                bootbox.confirm("确认分享`" + item.title + "`？", (result) => {
-                    if (result) {
-                        this.doShareMarkdown(item.id)
-                    }
-                })*/
-                    },
-                    async doShareMarkdown(id, duration) {
-                        let result = await axios.post('/share/markdown/' + id, {
-                            duration : parseInt(duration)
-                        })
-                        if (result.data.code < 0) {
-                            bootbox.alert(result.data.message,)
-                        } else {
-                            bootbox.alert('<a href="' + result.data.data.link + '" target="_blank">点我打开' + result.data.data.share_code + '</a>')
-                        }
-                    },
+    <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>标题</th>
+                <th>分类</th>
+                <th style="text-align:center">操作</th>
+            </tr>
+        <tbody>
+            <tr v-for="(item, i) in list">
+                <td>{{item.id}}</td>
+                <td><a :href="'/markdown/detail.html?id=' + item.id">{{item.title}}</a></td>
+                <td>{{item.category}}</td>
+                <td class="link-list" style="text-align: center;">
+                    <a :href="'/markdown/edit.html?id=' + item.id" class="a-group">编辑</a>
+                    <a href="javascript:;" @click="showDeleteModal(item)" class="a-group">删除</a>
+                    <a href="javascript:;" @click="showShareModal(item)" class="a-group">分享</a>
+                </td>
+            </tr>
+    </table>
+</template>
+<script>
+    window.VueObject = {
+        data() {
+            return {
+                category: '',
+                categoryList: [],
+                list: [],
+            }
+        },
+        template: '#template',
+        async mounted() {
+            this.category = getQuery('category', 'all')
+            this.getCategoryList()
+            this.getList()
+        },
+        methods: {
+            async getCategoryList() {
+                let result = await axios.get('/distinct/markdown/category')
+                this.categoryList = result.data.data
+            },
+            async getList() {
+                let url = "/query/markdown"
+                if (this.category.length > 0 && this.category != 'all') {
+                    url = url + "?category=" + this.category
                 }
-            })
-            vm.mount('#app')
+                let result = await axios.get(url)
+                this.list = result.data.data
+            },
+            async selectClassify(category) {
+                reloadWith({
+                    category: category,
+                })
+            },
+            async showDeleteModal(item) {
+                bootbox.confirm("确认删除`" + item.title + "`？", (result) => {
+                    if (result) {
+                        this.doDeleteMarkdown(item.id)
+                    }
+                })
+            },
+            async doDeleteMarkdown(id) {
+                let result = await axios.post('/delete/markdown/' + id)
+                if (result.data.code < 0) {
+                    bootbox.alert(result.data.message, () => {
+                        this.getList()
+                    })
+                } else {
+                    bootbox.alert("删除成功", () => {
+                        this.getList()
+                    })
+                }
+            },
+            async showShareModal(item) {
+                bootbox.prompt({
+                    title: "确认分享`" + item.title + "`？请选择时长",
+                    inputType: 'select',
+                    value: 90 * 24 * 3600,
+                    inputOptions: [{
+                        text: '1天',
+                        value: 24 * 3600
+                    },
+                    {
+                        text: '7天',
+                        value: 7 * 24 * 3600
+                    },
+                    {
+                        text: '90天',
+                        value: 90 * 24 * 3600
+                    },
+                    {
+                        text: '永久',
+                        value: -1
+                    }],
+                    callback: (result) => {
+                        if(result == null) return
+                        this.doShareMarkdown(item.id, result)
+                    }
+                });
+            },
+            async doShareMarkdown(id, duration) {
+                let result = await axios.post('/share/markdown/' + id, {
+                    duration: parseInt(duration)
+                })
+                if (result.data.code < 0) {
+                    bootbox.alert(result.data.message)
+                } else {
+                    
+                    bootbox.alert({
+                        title: '分享成功',
+                        message: '分享的链接为：<p><a href="' + result.data.data.link + '" target="_blank">' + window.location.host + result.data.data.link  + '</a></p>'
+                    })
+                }
+            },
         }
-
-    </script>
-</body>
-
+    }
+</script>
 </html>

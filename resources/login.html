@@ -6,58 +6,53 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>登录</title>
     <script type="text/javascript"> window.hideHeader = true</script>
-    <script src="/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pure-js-loader/loader.js"></script>
+    <script src="/framework.js"></script>
 </head>
 
-<body>
-    <div id="app"></div>
-    <template id="template">
-        <div style="margin: 15% auto; width: 60%;">
-            <div class="panel panel-primary">
-                <div class="panel-heading">登录</div>
-                <div class="panel-body">
-                    <div class="form-group">
-                        <textarea class="form-control" placeholder="请输入登录token" v-model="token"></textarea>
-                    </div>
-                    <button class="btn btn-primary" @click="confirmLogin()">确认</button>
+<body></body>
+
+<template id="template">
+    <div style="margin: 15% auto; width: 60%;">
+        <div class="panel panel-primary">
+            <div class="panel-heading">登录</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <textarea class="form-control" placeholder="请输入登录token" v-model="token"></textarea>
                 </div>
+                <button class="btn btn-primary" @click="confirmLogin()">确认</button>
             </div>
         </div>
-    </template>
-    <script>
-
-        function startWork() {
-            var vm = Vue.createApp({
-                data() {
-                    let list = []
-                    return {
-                        token: '',
-                    }
-                },
-                template: '#template',
-                async mounted() {
-                },
-                methods: {
-                    async confirmLogin() {
-                        if(this.token.length < 1) {
-                            return
-                        }
-                        let result = await axios.post('/login', {
-                            token: this.token,
-                        }, {
-                            withCredentials: true
-                        })
-                        if (result.data.code != 0) {
-                            bootbox.alert(result.data.message);
-                        } else {
-                            window.location.href = getQuery('jump', '/')
-                        }
-                    }
+    </div>
+</template>
+<script>
+    window.VueObject = {
+        data() {
+            let list = []
+            return {
+                token: '',
+            }
+        },
+        template: '#template',
+        async mounted() {
+        },
+        methods: {
+            async confirmLogin() {
+                if (this.token.length < 1) {
+                    return
                 }
-            })
-            vm.mount('#app')
+                let result = await axios.post('/login', {
+                    token: this.token,
+                }, {
+                    withCredentials: true
+                })
+                if (result.data.code != 0) {
+                    bootbox.alert(result.data.message);
+                } else {
+                    window.location.href = getQuery('jump', '/')
+                }
+            }
         }
-    </script>
-</body>
-
+    }
+</script>
 </html>

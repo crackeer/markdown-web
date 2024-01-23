@@ -5,68 +5,64 @@
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>首页</title>
-
-    <script src="/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pure-js-loader/loader.js"></script>
+    <script src="/framework.js"></script>
 </head>
 
-<body>
-    <div id="app"></div>
-    <template id="template">
-        <h1 class="pt-3">Hello，world！！！</h1>
-        <hr />
-        <div class="container text-center">
-            <div class="row">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-body">
-                            <a href="/markdown/create.html" class="thumbnail" style="padding: 20px; font-size: 18px;">
-                                写文档
-                            </a>
-                        </div>
+<body></body>
+
+<template id="template">
+    <h1 class="pt-3">Hello，world！！！</h1>
+    <hr />
+    <div class="container text-center">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <a href="/markdown/create.html" class="thumbnail" style="padding: 20px; font-size: 18px;">
+                            写文档
+                        </a>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="card">
-                        <div class="card-body">
-                            <a href="/bookmark/list.html" class="thumbnail" style="padding: 20px; font-size: 18px;">
-                                管理书签
-                            </a>
-                        </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <a href="/bookmark/list.html" class="thumbnail" style="padding: 20px; font-size: 18px;">
+                            管理书签
+                        </a>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="card">
-                        <div class="card-body">
-                            <a href="/code/create.html" class="thumbnail" style="padding: 20px; font-size: 18px;">
-                                代码片段
-                            </a>
-                        </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <a href="/code/create.html" class="thumbnail" style="padding: 20px; font-size: 18px;">
+                            代码片段
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </template>
-    <script>
-        function startWork() {
-            var vm = Vue.createApp({
-                data() {
-                    let list = []
-                    return {
-                        id: 0,
-                        content: '',
-                        title: '',
-                        classify: '',
-                    }
-                },
-                template: '#template',
-                async mounted() {
-                },
-                methods: {
-                }
-            })
-            vm.mount('#app')
+    </div>
+</template>
+<script defer>
+    window.VueObject = {
+        data() {
+            let list = []
+            return {
+                id: 0,
+                content: '',
+                title: '',
+                classify: '',
+            }
+        },
+        template: '#template',
+        async mounted() {
+        },
+        methods: {
         }
-    </script>
-</body>
+    }
+</script>
 
 </html>

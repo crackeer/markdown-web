@@ -5,117 +5,113 @@
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>文档编辑</title>
-
-    <script src="/header.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/pure-js-loader/loader.js"></script>
+    <script src="/framework.js"></script>
 </head>
 
 <body>
-    <div id="app"></div>
-    <template id="template">
-        <div class="row g-3 align-items-center" style="margin-top: 7px;">
-            <label for="title" class="col-form-label col-sm-1 text-end">标题</label>
-            <div class="col-sm-6">
-                <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-primary" @click="createMarkdown">提交</button>
-            </div>
-        </div>
-        <div class="row g-3 align-items-center" style="margin-top: 0px; margin-bottom: 10px;">
-            <label for="category" class="col-form-label col-sm-1 text-end">分类</label>
-            <div class="col-sm-6">
-                <template v-for="(item, i) in categoryList">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="category" :value="item" v-model="category" />
-                        <label class="form-check-label" for="inlineRadio1">{{item}}</label>
-                    </div>
-                </template>
-                <a href="javascript:;" @click="addCategory()">
-                    增加
-                </a>
-            </div>
-        </div>
-        
-    </template>
     <div id="markdown"></div>
-    <script>
-        function startWork() {
-            var vm = Vue.createApp({
-                data() {
-                    let list = []
-                    return {
-                        id: 0,
-                        content: '',
-                        title: '',
-                        category: '',
-                        categoryList: [],
-                    }
-                },
-                template: '#template',
-                async mounted() {
-                    this.getCategoryList()
-                    this.id = getQuery('id', 0)
-                    this.getMarkdown()
-                },
-                methods: {
-                    async getCategoryList() {
-                        let result = await axios.get('/distinct/markdown/category')
-                        this.categoryList = result.data.data || []
-                    },
-                    async addCategory() {
-                        bootbox.prompt("请输入分类", (result) => {
-                            if (result == null) {
-                                return true
-                            }
-                            if (result.length < 1) {
-                                return false
-                            }
-                            this.categoryList.push(result)
-                            this.category = result
-                        })
-                    },
-                    async getMarkdown() {
-                        let result = await axios.get('/query/markdown?id=' + this.id)
-                        if (result.data.data.length < 1) {
-                            return
-                        }
-                        this.content = result.data.data[0].content
-                        this.title = result.data.data[0].title
-                        this.category = result.data.data[0].category
-                        initMarkdownEditor("markdown", this.content, (value) => {
-                            this.content = value
-                        })
-                    },
-                    async updateMarkdown() {
-                        let data = {
-                            title: this.title,
-                            content: this.content,
-                            category: this.category,
-                        }
-                        if (this.title.trim().length < 1) {
-                            bootbox.alert('请输入标题')
-                            return
-                        }
-                        if (this.category.trim().length < 1) {
-                            bootbox.alert('请选择分类')
-                            return
-                        }
-                        let result = await axios.post('/modify/markdown/' + this.id, data)
-                        if (result.data.code != 0) {
-                            bootbox.alert(result.data.message)
-                            return
-                        }
-                        jump('/markdown/detail.html', {
-                            'id': this.id,
-                        })
-
-                    }
-                }
-            })
-            vm.mount('#app')
-        }
-    </script>
 </body>
+<template id="template">
+    <div class="row g-3 align-items-center" style="margin-top: 7px;">
+        <label for="title" class="col-form-label col-sm-1 text-end">标题</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" placeholder="请输入标题" v-model="title">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" @click="createMarkdown">提交</button>
+        </div>
+    </div>
+    <div class="row g-3 align-items-center" style="margin-top: 0px; margin-bottom: 10px;">
+        <label for="category" class="col-form-label col-sm-1 text-end">分类</label>
+        <div class="col-sm-6">
+            <template v-for="(item, i) in categoryList">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="category" :value="item" v-model="category" />
+                    <label class="form-check-label" for="inlineRadio1">{{item}}</label>
+                </div>
+            </template>
+            <a href="javascript:;" @click="addCategory()">
+                增加
+            </a>
+        </div>
+    </div>
+
+</template>
+
+<script>
+    window.VueObject = {
+        data() {
+            let list = []
+            return {
+                id: 0,
+                content: '',
+                title: '',
+                category: '',
+                categoryList: [],
+            }
+        },
+        template: '#template',
+        async mounted() {
+            this.getCategoryList()
+            this.id = getQuery('id', 0)
+            this.getMarkdown()
+        },
+        methods: {
+            async getCategoryList() {
+                let result = await axios.get('/distinct/markdown/category')
+                this.categoryList = result.data.data || []
+            },
+            async addCategory() {
+                bootbox.prompt("请输入分类", (result) => {
+                    if (result == null) {
+                        return true
+                    }
+                    if (result.length < 1) {
+                        return false
+                    }
+                    this.categoryList.push(result)
+                    this.category = result
+                })
+            },
+            async getMarkdown() {
+                let result = await axios.get('/query/markdown?id=' + this.id)
+                if (result.data.data.length < 1) {
+                    return
+                }
+                this.content = result.data.data[0].content
+                this.title = result.data.data[0].title
+                this.category = result.data.data[0].category
+                initMarkdownEditor("markdown", this.content, (value) => {
+                    this.content = value
+                })
+            },
+            async updateMarkdown() {
+                let data = {
+                    title: this.title,
+                    content: this.content,
+                    category: this.category,
+                }
+                if (this.title.trim().length < 1) {
+                    bootbox.alert('请输入标题')
+                    return
+                }
+                if (this.category.trim().length < 1) {
+                    bootbox.alert('请选择分类')
+                    return
+                }
+                let result = await axios.post('/modify/markdown/' + this.id, data)
+                if (result.data.code != 0) {
+                    bootbox.alert(result.data.message)
+                    return
+                }
+                jump('/markdown/detail.html', {
+                    'id': this.id,
+                })
+
+            }
+        }
+    }
+</script>
 
 </html>

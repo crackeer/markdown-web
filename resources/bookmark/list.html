@@ -5,345 +5,337 @@
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>书签</title>
-    <script src="/header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pure-js-loader/loader.js"></script>
+    <script src="/framework.js"></script>
 </head>
 
-<body>
-    <div id="app"></div>
+<body></body>
 
-    <template id="template">
-        <div style="position: fixed; right: 10px; bottom: 60px; z-index: 1000" v-if="mode.length < 1">
-            <button class="btn btn-primary btn-block" @click="showCreateModel()" style="margin-right: 10px;">新建</button>
-            <button class="btn btn-warning btn-block" @click="setMode('edit')" style="margin-right: 10px;">编辑</button>
-            <button class="btn btn-info btn-block" @click="importBookmark">导入标签 <span class="glyphicon glyphicon-import"
-                    aria-hidden="true"></span></button>
-        </div>
-        <div style="position: sticky; top: 0;  padding-bottom:  20px; z-index: 1000;" v-if="mode.length > 0">
-            <button class="btn btn-info" @click="setMode('')">退出编辑模式</button>
-            <button class="btn btn-danger" @click="batchDelete()" v-if="selectIds.length > 0"
-                style="margin-left: 10px;">删除选中的{{selectIds.length }}个书签</button>
-            <button class="btn btn-primary" @click="showBatchUpdateModal()" v-if="selectIds.length > 0"
-                style="margin-left: 10px;">转移选中的{{selectIds.length
-                }}个书签</button>
-        </div>
+<template id="template">
+    <div style="position: fixed; right: 10px; bottom: 60px; z-index: 1000" v-if="mode.length < 1">
+        <button class="btn btn-primary btn-block" @click="showCreateModel()" style="margin-right: 10px;">新建</button>
+        <button class="btn btn-warning btn-block" @click="setMode('edit')" style="margin-right: 10px;">编辑</button>
+        <button class="btn btn-info btn-block" @click="importBookmark">导入标签 <span class="glyphicon glyphicon-import"
+                aria-hidden="true"></span></button>
+    </div>
+    <div style="position: sticky; top: 0;  padding-bottom:  20px; z-index: 1000;" v-if="mode.length > 0">
+        <button class="btn btn-info" @click="setMode('')">退出编辑模式</button>
+        <button class="btn btn-danger" @click="batchDelete()" v-if="selectIds.length > 0"
+            style="margin-left: 10px;">删除选中的{{selectIds.length }}个书签</button>
+        <button class="btn btn-primary" @click="showBatchUpdateModal()" v-if="selectIds.length > 0"
+            style="margin-left: 10px;">转移选中的{{selectIds.length
+            }}个书签</button>
+    </div>
 
-        <div style="position: sticky; top: 0;  padding:10px; z-index: 1000; text-align: center; background-color: #f5f5f5; font-size: 18px;margin-bottom: 10px; opacity: 0.8;margin-top: 8px"
-            v-if="mode == '' && list.length > 0" class="link-list">
-            <template v-for="item in list">
-                <a :href="'#' + item.category">
-                    {{item.category}}
-                </a>
-            </template>
-        </div>
-
-
-        <template v-for="item in list" v-if="mode.length < 1">
-            <div :id="item.category">
-                <div class="card">
-                    <div class="card-header" :id="item.category" style="font-size: 16px;">
-                        <strong>{{item.category}}({{item.list.length}})</strong>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <template v-for="item2 in item.list" v-if="mode == ''">
-                                <div class="col-xs-6 col-md-3">
-                                    <a :href="item2.link" target="_blank" class="bookmark">
-                                        {{item2.title.length > 17 ? item2.title.substring(0, 17) +'...' : item2.title}}
-                                    </a>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div style="position: sticky; top: 0;  padding:10px; z-index: 1000; text-align: center; background-color: #f5f5f5; font-size: 18px;margin-bottom: 10px; opacity: 0.8;margin-top: 8px"
+        v-if="mode == '' && list.length > 0" class="link-list">
+        <template v-for="item in list">
+            <a :href="'#' + item.category">
+                {{item.category}}
+            </a>
         </template>
+    </div>
 
-        <template v-for="item in list" v-if="mode == 'edit'">
-            <div class="card panel-default">
-                <div class="card-header" style="font-size: 16px;">
-                    <strong>{{item.category}} · {{item.list.length}}</strong>
+    <template v-for="item in list" v-if="mode.length < 1">
+        <div :id="item.category">
+            <div class="card">
+                <div class="card-header" :id="item.category" style="font-size: 16px;">
+                    <strong>{{item.category}}({{item.list.length}})</strong>
                 </div>
                 <div class="card-body">
-                    <div class="btn-group pb-1" role="group">
-                        <button type="button" class="btn btn-primary" @click="selectAll(item)">全选</button>
-                        <button type="button" class="btn btn-primary" @click="deselectAll(item)">全不选</button>
-                    </div>
-                    <template v-for="item2 in item.list">
-
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" :value="item2.id" v-model="selectIds">
-                            <label class="form-check-label" for="selectIds">
-                                {{item2.title}}<a @click="showEditModel(item2)" style="margin-left: 7px;"
-                                    href="javascript:;">edit</a>
-                            </label>
-                        </div>
-
-                    </template>
-                </div>
-            </div>
-        </template>
-
-        <div class="modal fade" tabindex="-1" role="dialog" id="myAddModal">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">转移书签到</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-
-                        <label for="name" class="form-label">分类</label>
-                        <input type="text" class="form-control" v-model="category">
-                        <template v-for="item in list">
-                            <div class="form-check form-check-inline pt-1">
-                                <input class="form-check-input" type="radio" name="category" :value="item.category"
-                                    v-model="category" />
-                                <label class="form-check-label" for="inlineRadio1">{{item.category}}</label>
+                    <div class="row">
+                        <template v-for="item2 in item.list" v-if="mode == ''">
+                            <div class="col-xs-6 col-md-3">
+                                <a :href="item2.link" target="_blank" class="bookmark">
+                                    {{item2.title.length > 17 ? item2.title.substring(0, 17) +'...' : item2.title}}
+                                </a>
                             </div>
                         </template>
-                       
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-primary" @click="doBatchUpdate()">保存</button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">{{ this.edit ? '修改' : '新建'}}书签</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">名字</label>
-                            <input type="text" class="form-control" v-model="title" placeholder="书签名字">
-                        </div>
-                        <div class="mb-3">
-                            <label for="name" class="form-label">链接</label>
-                            <textarea class="form-control" v-model="link" placeholder="链接" rows="3"></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="name" class="form-label">分类</label>
-                            <input type="text" class="form-control" v-model="category">
-                            <template v-for="item in categoryList">
-                                <div class="form-check form-check-inline pt-1">
-                                    <input class="form-check-input" type="radio" name="category" :value="item"
-                                        v-model="category" />
-                                    <label class="form-check-label" for="inlineRadio1">{{item}}</label>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-primary" @click="doUpdateBookmark()">保存</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </template>
-    <script>
-        var startWork = function () {
-            var vm = Vue.createApp({
-                data() {
-                    return {
-                        mode: '',
-                        edit: false,
-                        bookmark_id: 0,
-                        title: 'Edit',
-                        link: '',
-                        category: '',
-                        list: [],
-                        categoryList: [],
-                        addIds: [],
-                        selectIds: [],
+
+    <template v-for="item in list" v-if="mode == 'edit'">
+        <div class="card panel-default">
+            <div class="card-header" style="font-size: 16px;">
+                <strong>{{item.category}} · {{item.list.length}}</strong>
+            </div>
+            <div class="card-body">
+                <div class="btn-group pb-1" role="group">
+                    <button type="button" class="btn btn-primary" @click="selectAll(item)">全选</button>
+                    <button type="button" class="btn btn-primary" @click="deselectAll(item)">全不选</button>
+                </div>
+                <template v-for="item2 in item.list">
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" :value="item2.id" v-model="selectIds">
+                        <label class="form-check-label" for="selectIds">
+                            {{item2.title}}<a @click="showEditModel(item2)" style="margin-left: 7px;"
+                                href="javascript:;">edit</a>
+                        </label>
+                    </div>
+
+                </template>
+            </div>
+        </div>
+    </template>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="myAddModal">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">转移书签到</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <label for="name" class="form-label">分类</label>
+                    <input type="text" class="form-control" v-model="category">
+                    <template v-for="item in list">
+                        <div class="form-check form-check-inline pt-1">
+                            <input class="form-check-input" type="radio" name="category" :value="item.category"
+                                v-model="category" />
+                            <label class="form-check-label" for="inlineRadio1">{{item.category}}</label>
+                        </div>
+                    </template>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="doBatchUpdate()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">{{ this.edit ? '修改' : '新建'}}书签</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">名字</label>
+                        <input type="text" class="form-control" v-model="title" placeholder="书签名字">
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">链接</label>
+                        <textarea class="form-control" v-model="link" placeholder="链接" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">分类</label>
+                        <input type="text" class="form-control" v-model="category">
+                        <template v-for="item in categoryList">
+                            <div class="form-check form-check-inline pt-1">
+                                <input class="form-check-input" type="radio" name="category" :value="item"
+                                    v-model="category" />
+                                <label class="form-check-label" for="inlineRadio1">{{item}}</label>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="doUpdateBookmark()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</template>
+<script defer>
+    window.VueObject = {
+        data() {
+            return {
+                mode: '',
+                edit: false,
+                bookmark_id: 0,
+                title: 'Edit',
+                link: '',
+                category: '',
+                list: [],
+                categoryList: [],
+                addIds: [],
+                selectIds: [],
+            }
+        },
+        template: '#template',
+        async mounted() {
+            this.getList()
+
+        },
+        methods: {
+            async getCategoryList() {
+                let result = await axios.get('/distinct/bookmark/category')
+                this.categoryList = result.data.data
+            },
+            async getList() {
+                let url = "/query/bookmark"
+                let result = await axios.get(url)
+                let list = result.data.data
+                let groupBookmark = {}
+                for (var i in list) {
+                    if (groupBookmark[list[i].category] == undefined) {
+                        groupBookmark[list[i].category] = []
                     }
-                },
-                template: '#template',
-                async mounted() {
+                    groupBookmark[list[i].category].push(list[i])
+                }
+                let groupBookmarkList = []
+                let categorys = Object.keys(groupBookmark);
+                for (var i in categorys) {
+                    groupBookmarkList.push({
+                        'category': categorys[i],
+                        'list': groupBookmark[categorys[i]],
+                    })
+                }
+                this.list = groupBookmarkList
+                this.getCategoryList()
+            },
+            async showCreateModel() {
+                this.title = ''
+                this.link = ''
+                this.category = ''
+                this.edit = false
+                const myModal = new bootstrap.Modal('#myModal', {
+                    keyboard: false
+                })
+                myModal.show()
+            },
+            async showEditModel(item) {
+                this.title = item.title
+                this.link = item.link
+                this.category = item.category
+                this.bookmark_id = item.id
+                this.edit = true
+                const myModal = new bootstrap.Modal('#myModal', {
+                    keyboard: false
+                })
+                myModal.show()
+            },
+            async showDeleteModal(item) {
+                bootbox.confirm("确认删除`" + item.title + "`？", (result) => {
+                    if (result) {
+                        this.doDelete(item.id)
+                    }
+                })
+            },
+            async doDelete(id) {
+                let result = await axios.post('/delete/bookmark/' + id)
+                if (result.data.code < 0) {
+                    bootbox.alert(result.data.message)
+                } else {
                     this.getList()
+                }
+            },
+            async batchDelete(id) {
+                for (var i in this.selectIds) {
+                    let result = await axios.post('/delete/bookmark/' + this.selectIds[i])
+                }
+                bootbox.alert("删除完成", () => {
+                    this.getList()
+                    this.selectIds = []
+                })
 
-                },
-                methods: {
-                    async getCategoryList() {
-                        let result = await axios.get('/distinct/bookmark/category')
-                        this.categoryList = result.data.data
-                    },
-                    async getList() {
-                        let url = "/query/bookmark"
-                        let result = await axios.get(url)
-                        let list = result.data.data
-                        let groupBookmark = {}
-                        for (var i in list) {
-                            if (groupBookmark[list[i].category] == undefined) {
-                                groupBookmark[list[i].category] = []
-                            }
-                            groupBookmark[list[i].category].push(list[i])
-                        }
-                        let groupBookmarkList = []
-                        let categorys = Object.keys(groupBookmark);
-                        for (var i in categorys) {
-                            groupBookmarkList.push({
-                                'category': categorys[i],
-                                'list': groupBookmark[categorys[i]],
-                            })
-                        }
-                        this.list = groupBookmarkList
-                        this.getCategoryList()
-                    },
-                    async showCreateModel() {
-                        this.title = ''
-                        this.link = ''
-                        this.category = ''
-                        this.edit = false
-                        const myModal = new bootstrap.Modal('#myModal', {
-                            keyboard: false
-                        })
-                        myModal.show()
-                    },
-                    async showEditModel(item) {
-                        this.title = item.title
-                        this.link = item.link
-                        this.category = item.category
-                        this.bookmark_id = item.id
-                        this.edit = true
-                        const myModal = new bootstrap.Modal('#myModal', {
-                            keyboard: false
-                        })
-                        myModal.show()
-                    },
-                    async showDeleteModal(item) {
-                        bootbox.confirm("确认删除`" + item.title + "`？", (result) => {
-                            if (result) {
-                                this.doDelete(item.id)
-                            }
-                        })
-                    },
-                    async doDelete(id) {
-                        let result = await axios.post('/delete/bookmark/' + id)
-                        if (result.data.code < 0) {
-                            bootbox.alert(result.data.message)
-                        } else {
-                            this.getList()
-                        }
-                    },
-                    async batchDelete(id) {
-                        for (var i in this.selectIds) {
-                            let result = await axios.post('/delete/bookmark/' + this.selectIds[i])
-                        }
-                        bootbox.alert("删除完成", () => {
-                            this.getList()
-                            this.selectIds = []
-                        })
-
-                    },
-                    selectAll(item) {
-                        let tmp = {}
-                        for (var i = 0; i < this.selectIds.length; i++) {
-                            tmp[this.selectIds[i]] = true
-                        }
-                        for (var i = 0; i < item.list.length; i++) {
-                            tmp[item.list[i].id] = true
-                        }
-                        this.selectIds = Object.keys(tmp)
-                    },
-                    deselectAll(item) {
-                        let tmp = {}
-                        for (var i = 0; i < this.selectIds.length; i++) {
-                            tmp[this.selectIds[i]] = true
-                        }
-                        for (var i = 0; i < item.list.length; i++) {
-                            delete tmp[item.list[i].id]
-                        }
-                        this.selectIds = Object.keys(tmp)
-                    },
-                    showBatchUpdateModal(item) {
-                        this.category = ''
-                        $('#myAddModal').modal('show')
-                    },
-                    async doBatchUpdate() {
-                        for (var i in this.selectIds) {
-                            let result = await axios.post('/modify/bookmark/' + this.selectIds[i], {
-                                'category': this.category,
-                            })
-                        }
-                        this.selectIds = []
-                        $('#myAddModal').modal('hide')
-                        this.getList()
-                    },
-                    setMode(mode) {
-                        this.mode = mode
-                        this.selectIds = []
-                    },
-                    async importBookmark() {
-                        let result = await window.showOpenFilePicker();
-                        if (result.length < 1) {
-                            return
-                        }
-                        let content = await result[0].getFile();
-                        const buffer = await content.arrayBuffer();
-                        let decoder = new TextDecoder("utf-8");
-                        let htmlContent = decoder.decode(buffer)
-                        let firstFolder = $(htmlContent).find("a")
-                        for (let i = 0; i < firstFolder.length; i++) {
-                            let folder = firstFolder[i]
-                            if ($(folder).attr("href") != undefined) {
-                                let insertData = {
-                                    "link": $(folder).attr("href"),
-                                    "title": $(folder).text(),
-                                    'category': '浏览器导入',
-                                }
-                                await axios.post('/create/bookmark', insertData)
-                            }
-                        }
-
-                    },
-                    async doUpdateBookmark() {
-                        if (this.edit) {
-                            let updateData = {
-                                'title': this.title,
-                                'link': this.link,
-                                'category': this.category,
-                            }
-
-                            let result = await axios.post('/modify/bookmark/' + this.bookmark_id, updateData)
-                            if (result.data.code < 0) {
-                                bootbox.alert(result.data.message)
-                            } else {
-                                $('#myModal').modal('hide')
-                                this.getList()
-                            }
-
-                            return
-                        }
+            },
+            selectAll(item) {
+                let tmp = {}
+                for (var i = 0; i < this.selectIds.length; i++) {
+                    tmp[this.selectIds[i]] = true
+                }
+                for (var i = 0; i < item.list.length; i++) {
+                    tmp[item.list[i].id] = true
+                }
+                this.selectIds = Object.keys(tmp)
+            },
+            deselectAll(item) {
+                let tmp = {}
+                for (var i = 0; i < this.selectIds.length; i++) {
+                    tmp[this.selectIds[i]] = true
+                }
+                for (var i = 0; i < item.list.length; i++) {
+                    delete tmp[item.list[i].id]
+                }
+                this.selectIds = Object.keys(tmp)
+            },
+            showBatchUpdateModal(item) {
+                this.category = ''
+                $('#myAddModal').modal('show')
+            },
+            async doBatchUpdate() {
+                for (var i in this.selectIds) {
+                    let result = await axios.post('/modify/bookmark/' + this.selectIds[i], {
+                        'category': this.category,
+                    })
+                }
+                this.selectIds = []
+                $('#myAddModal').modal('hide')
+                this.getList()
+            },
+            setMode(mode) {
+                this.mode = mode
+                this.selectIds = []
+            },
+            async importBookmark() {
+                let result = await window.showOpenFilePicker();
+                if (result.length < 1) {
+                    return
+                }
+                let content = await result[0].getFile();
+                const buffer = await content.arrayBuffer();
+                let decoder = new TextDecoder("utf-8");
+                let htmlContent = decoder.decode(buffer)
+                let firstFolder = $(htmlContent).find("a")
+                for (let i = 0; i < firstFolder.length; i++) {
+                    let folder = firstFolder[i]
+                    if ($(folder).attr("href") != undefined) {
                         let insertData = {
-                            'title': this.title,
-                            'link': this.link,
-                            'category': this.category,
+                            "link": $(folder).attr("href"),
+                            "title": $(folder).text(),
+                            'category': '浏览器导入',
                         }
-                        let result = await axios.post('/create/bookmark', insertData)
-                        if (result.data.code < 0) {
-                            alert(result.data.message)
-                        }
-
-                        simpleReload()
+                        await axios.post('/create/bookmark', insertData)
                     }
                 }
-            })
-            vm.mount('#app')
+
+            },
+            async doUpdateBookmark() {
+                if (this.edit) {
+                    let updateData = {
+                        'title': this.title,
+                        'link': this.link,
+                        'category': this.category,
+                    }
+
+                    let result = await axios.post('/modify/bookmark/' + this.bookmark_id, updateData)
+                    if (result.data.code < 0) {
+                        bootbox.alert(result.data.message)
+                    } else {
+                        $('#myModal').modal('hide')
+                        this.getList()
+                    }
+
+                    return
+                }
+                let insertData = {
+                    'title': this.title,
+                    'link': this.link,
+                    'category': this.category,
+                }
+                let result = await axios.post('/create/bookmark', insertData)
+                if (result.data.code < 0) {
+                    alert(result.data.message)
+                }
+
+                simpleReload()
+            }
         }
+    }
 
-    </script>
-</body>
-<style>
-
-</style>
+</script>
 
 </html>

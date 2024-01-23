@@ -59,7 +59,6 @@ var jsFile3 = [
 document.addEventListener("DOMContentLoaded", async () => {
     loadStyles(styleFiles)
     await loadJs(jsFile1)
-    //await sleep(400)
     if (window.hideHeader != undefined && window.hideHeader) {
     } else {
         loadNavigation()
@@ -80,7 +79,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 function loadNavigation() {
     $('body').prepend(header)
     let parts = window.location.pathname.split('/')
-    console.log(parts[1])
     $('a[id="' + parts[1] + '-a"]').parent().addClass('active')
 }
 
@@ -106,7 +104,6 @@ async function getLoginUser() {
     }
 
     let result = await axios.get('/user')
-    console.log(result);
     let data = result.data;
     if (data.code === 0 && data.data != null && data.data.name !=  undefined) {
         window.USER = data.data
@@ -116,7 +113,6 @@ async function getLoginUser() {
 
 
 async function loadJs(urls) {
-    //var head = document.getElementsByTagName("head")[0];
     for (var i = 0; i < urls.length; i++) {
         await loadJsUrl(urls[i])
     }
