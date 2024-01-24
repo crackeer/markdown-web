@@ -6,6 +6,8 @@ window.registerCssLibrary({
     "github-markdown": "/assets/bytemd/github-markdown.css",
     "bytemd-highlight": "/assets/bytemd/highlight.css",
 })
+window.VueObject = null
+window.VueMount = "#app"
 
 //window.addJsFile("jquery", "/assets/js/jquery.js", 1)
 window.registerJSLibrary({
@@ -37,6 +39,9 @@ window.quickStart(['bootstrap', 'my', 'bytemd', 'github-markdown', 'bytemd-highl
 }, async () => {
     await loadNavigation()
     await getLoginUser()
+    if (window.VueObject != null) {
+        window.Vm = mountVueObject(window.VueObject, window.VueMount)
+    }
 })
 
 
@@ -63,6 +68,17 @@ async function getLoginUser() {
         window.USER = data.data
         $('#username').html(window.USER.name + '<span class="caret"></span>')
     }
+}
+
+function mountVueObject(object, element) {
+    if (Vue === undefined) {
+        console.log('mountVueObject, Vue not defined');
+        return
+    }
+
+    var vm = Vue.createApp(object)
+    vm.mount(element)
+    return vm
 }
 
 
