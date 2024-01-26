@@ -45,15 +45,15 @@ async function initialize() {
     // load css
     let result = await fetch("/template/head.html")
     let header = await result.text()
-    document.getElementsByTagName('head')[0].insertAdjacentHTML('afterEnd', header)
+    document.getElementsByTagName('head')[0].insertAdjacentHTML('beforeEnd', header)
 
     if (hideNavigation()) {
-        document.getElementsByTagName('body')[0].insertAdjacentHTML('afterBegin', DIV_APP_HTML)
+        document.getElementsByTagName('body')[0].insertAdjacentHTML('beforeEnd', DIV_APP_HTML)
     } else {
         // load nav
         let result = await fetch("/template/nav.html")
         let navigation = await result.text()
-        document.getElementsByTagName('body')[0].insertAdjacentHTML('afterBegin', navigation + DIV_APP_HTML)
+        document.getElementsByTagName('body')[0].insertAdjacentHTML('beforeEnd', navigation + DIV_APP_HTML)
         getLoginUser()
     }
 
