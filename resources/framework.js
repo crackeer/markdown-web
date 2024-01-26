@@ -20,6 +20,13 @@ const HIDE_NAVIGATION_PAGES = [
     '/share.html',
     '/login.html',
 ]
+const DIV_APP_HTML = `<div id="app">
+    <div class="d-flex justify-content-center pt-5">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>`
 
 function loadJsUrl(url) {
     return new Promise((resolve) => {
@@ -41,12 +48,12 @@ async function initialize() {
     document.getElementsByTagName('head')[0].insertAdjacentHTML('afterEnd', header)
 
     if (hideNavigation()) {
-        document.getElementsByTagName('body')[0].insertAdjacentHTML('afterBegin', '<div id="app"></div>')
+        document.getElementsByTagName('body')[0].insertAdjacentHTML('afterBegin', DIV_APP_HTML)
     } else {
         // load nav
         let result = await fetch("/template/nav.html")
         let navigation = await result.text()
-        document.getElementsByTagName('body')[0].insertAdjacentHTML('afterBegin', navigation + '<div id="app"></div>')
+        document.getElementsByTagName('body')[0].insertAdjacentHTML('afterBegin', navigation + DIV_APP_HTML)
         getLoginUser()
     }
 
