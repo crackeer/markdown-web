@@ -55,6 +55,7 @@ async function initialize() {
         let navigation = await result.text()
         document.getElementsByTagName('body')[0].insertAdjacentHTML('beforeEnd', navigation + DIV_APP_HTML)
         getLoginUser()
+        setActiveNav()
     }
 
     // load js
@@ -89,6 +90,20 @@ async function getLoginUser() {
         window.USER = data.data
         document.getElementById('username').innerHTML = window.USER.name + '<span class="caret"></span>'
     }
+}
+
+function setActiveNav() {
+    let link = document.querySelector('a[category=' + getPageType() + ']')
+    if(link == null) return;
+    link.classList.add('text-primary', 'fw-bold')
+}
+
+function getPageType() {
+    let parts = window.location.pathname.split('/')
+    if(parts.length >= 2) {
+        return parts[1] || 'none'
+    }
+    return 'none'
 }
 
 function mountVueObject(object, element) {

@@ -8,11 +8,12 @@
 <body></body>
 
 <template id="template">
-    <div style="position: fixed; right: 10px; bottom: 60px; z-index: 1000" v-if="mode.length < 1">
-        <button class="btn btn-primary btn-block" @click="showCreateModel()" style="margin-right: 10px;">新建</button>
-        <button class="btn btn-warning btn-block" @click="setMode('edit')" style="margin-right: 10px;">编辑</button>
-        <button class="btn btn-info btn-block" @click="importBookmark">导入标签 <span class="glyphicon glyphicon-import"
-                aria-hidden="true"></span></button>
+    <div style="position: fixed; right: 30px; bottom: 60px; z-index: 1000" v-if="mode.length < 1">
+        <button class="btn btn-primary btn-block btn-sm" @click="showCreateModel()" style="margin-bottom: 10px;">新建 <i class="bi bi-forward"></i></button>
+        <br>
+        <button class="btn btn-warning btn-block btn-sm" @click="setMode('edit')" style="margin-bottom: 10px;">编辑 <i class="bi bi-pencil"></i></button>
+        <br>
+        <button class="btn btn-info btn-block btn-sm" @click="importBookmark">导入 <i class="bi bi-arrow-down-left"></i></button>
     </div>
     <div style="position: sticky; top: 0;  padding-bottom:  20px; z-index: 1000;" v-if="mode.length > 0">
         <button class="btn btn-info" @click="setMode('')">退出编辑模式</button>

@@ -13,21 +13,24 @@
 <template id="template">
     <div class="row g-3 align-items-center" style="margin: 7px 0;">
         <div class="col-12">
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="category" value="all" @change="selectClassify('all')"
+            <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+                <input class="btn-check" type="radio" name="category" value="all"
                     v-model="category" />
-                <label class="form-check-label" for="inlineRadio1">全部</label>
+                <label class="btn btn-outline-primary" for="inlineRadio1" @click="selectClassify('all')">全部</label>
+            
+                <template v-for="(item, i) in categoryList">
+                    <input class="btn-check" type="radio" name="category" :value="item"
+                        v-model="category" :id="'radio-' + item"/>
+                    <label class="btn btn-outline-primary" :for="'radio-' + item" @click="selectClassify(item)">{{item}}</label>
+                </template>
             </div>
-            <template v-for="(item, i) in categoryList">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="category" :value="item"
-                        @change="selectClassify(item)" v-model="category" />
-                    <label class="form-check-label" for="inlineRadio1">{{item}}</label>
-                </div>
-            </template>
-            <a class="btn btn-outline-primary btn-sm" href="/markdown/create.html">
-                创建
-            </a>
+            <div class="float-end">
+                <a class="btn btn-outline-primary btn-sm mx-3" href="/markdown/create.html">
+                创建 <i class="bi bi-forward"></i>
+                </a>
+            </div>
+           
+            
         </div>
     </div>
 
