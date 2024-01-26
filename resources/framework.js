@@ -1,72 +1,86 @@
 
-window.registerCssLibrary({
-    "bootstrap": "/assets/bootstrap/bootstrap.min.css",
-    "my": "/assets/css/my.css",
-    "bytemd": "/assets/bytemd/bytemd.css",
-    "github-markdown": "/assets/bytemd/github-markdown.css",
-    "bytemd-highlight": "/assets/bytemd/highlight.css",
-})
 window.VueObject = null
 window.VueMount = "#app"
 
-//window.addJsFile("jquery", "/assets/js/jquery.js", 1)
-window.registerJSLibrary({
-    "vue": "/assets/js/vue.global.js",
-    "jquery": "/assets/js/jquery.js",
-    "util": "/assets/js/util.js",
-    "axios": "/assets/js/axios.min.js",
-    "dayjs": "/assets/js/dayjs.min.js",
-    "bytemd": "/assets/bytemd/bytemd.umd.js",
-    "bootstrap5": "/assets/bootstrap/bootstrap.bundle.min.js",
-    "bootbox": "/assets/bootstrap/bootbox.js",
-    "bytemd-plugin-gfm": "/assets/bytemd/bytemd-plugin-gfm.js",
-    "bytemd-plugin-highlight": "/assets/bytemd/plugin-highlight.js",
-    "monaco-editor": "/assets/monaco-editor/min/vs/loader.js",
-})
+const JS_FILES = [
+    '/assets/js/vue.global.js',
+    '/assets/js/jquery.js',
+    '/assets/bootstrap/bootstrap.bundle.min.js',
+    '/assets/bootstrap/bootbox.js',
+    '/assets/js/axios.min.js',
+    '/assets/js/dayjs.min.js',
+    '/assets/js/util.js',
+    '/assets/bytemd/bytemd.umd.js',
+    '/assets/bytemd/bytemd-plugin-gfm.js',
+    '/assets/bytemd/plugin-highlight.js',
+    '/assets/monaco-editor/min/vs/loader.js',
+]
 
-window.quickStart(['bootstrap', 'my', 'bytemd', 'github-markdown', 'bytemd-highlight'], {
-    'vue' : 1,
-    'jquery' : 2,
-    'bootstrap5' : 3,
-    'bootbox' : 3,
-    'axios' : 4,
-    "dayjs" : 5,
-    'util': 6,
-    "bytemd" : 7,
-    "bytemd-plugin-gfm": 8,
-    "bytemd-plugin-highlight" : 9,
-    "monaco-editor" : 10
-}, async () => {
-    await loadNavigation()
-    await getLoginUser()
-    if (window.VueObject != null) {
-        window.Vm = mountVueObject(window.VueObject, window.VueMount)
-    }
-})
+const HIDE_NAVIGATION_PAGES = [
+    '/share.html',
+    '/login.html',
+]
 
-
-async function loadNavigation() {
-    let result = await fetch("/framework.html")
-    let header = await result.text()
-    if(window.hideHeader != undefined ) {
-        header = '<div id="app"></div>'
-    }
-    $('body').prepend(header)
-    let parts = window.location.pathname.split('/')
-    $('a[id="' + parts[1] + '-a"]').parent().addClass('active')
+function loadJsUrl(url) {
+    return new Promise((resolve) => {
+        let domScript = document.createElement("script");
+        domScript.src = url;
+        domScript.onload = domScript.onreadystatechange = function () {
+            if (!this.readyState || 'loaded' === this.readyState || 'complete' === this.readyState) {
+                resolve()
+            }
+        }
+        document.getElementsByTagName('head')[0].appendChild(domScript);
+    });
 }
 
+async function initialize() {
+    // load css
+    let result = await fetch("/template/head.html")
+    let header = await result.text()
+    document.getElementsByTagName('head')[0].insertAdjacentHTML('afterEnd', header)
 
-async function getLoginUser() {
-    if (window.location.pathname.indexOf('login.html') > -1 || window.location.pathname.indexOf('share.html') > -1) {
-        return
+    if (hideNavigation()) {
+        document.getElementsByTagName('body')[0].insertAdjacentHTML('afterBegin', '<div id="app"></div>')
+    } else {
+        // load nav
+        let result = await fetch("/template/nav.html")
+        let navigation = await result.text()
+        document.getElementsByTagName('body')[0].insertAdjacentHTML('afterBegin', navigation + '<div id="app"></div>')
+        getLoginUser()
     }
 
-    let result = await axios.get('/user')
-    let data = result.data;
+    // load js
+    for (var i = 0; i < JS_FILES.length; i++) {
+        await loadJsUrl(JS_FILES[i])
+        await sleep(1)
+    }
+
+    setTimeout(() => {
+        if (window.VueObject != null) {
+            window.Vm = mountVueObject(window.VueObject, window.VueMount)
+        }
+    }, 100)
+}
+
+initialize()
+
+function hideNavigation() {
+    for (var i in HIDE_NAVIGATION_PAGES) {
+        if (window.location.pathname == HIDE_NAVIGATION_PAGES[i]) {
+            return true
+        }
+    }
+    return false
+}
+
+async function getLoginUser() {
+    let result = await fetch('/user')
+
+    let data = await result.json();
     if (data.code === 0 && data.data != null && data.data.name != undefined) {
         window.USER = data.data
-        $('#username').html(window.USER.name + '<span class="caret"></span>')
+        document.getElementById('username').innerHTML = window.USER.name + '<span class="caret"></span>'
     }
 }
 
@@ -75,10 +89,15 @@ function mountVueObject(object, element) {
         console.log('mountVueObject, Vue not defined');
         return
     }
-
     var vm = Vue.createApp(object)
     vm.mount(element)
     return vm
 }
 
-
+function sleep(time) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, time);
+    });
+}

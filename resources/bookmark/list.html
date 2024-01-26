@@ -1,11 +1,7 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>书签</title>
-    <script src="https://cdn.jsdelivr.net/npm/pure-js-loader/loader.js"></script>
     <script src="/framework.js"></script>
 </head>
 
@@ -38,7 +34,7 @@
 
     <template v-for="item in list" v-if="mode.length < 1">
         <div :id="item.category">
-            <div class="card">
+            <div class="card" style="margin-top: 15px;">
                 <div class="card-header" :id="item.category" style="font-size: 16px;">
                     <strong>{{item.category}}({{item.list.length}})</strong>
                 </div>
