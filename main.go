@@ -155,6 +155,20 @@ func (Code) TableName() string {
 	return "code"
 }
 
+// Json
+type Json struct {
+	ID       int64  `json:"id"`
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	Username string `json:"username"`
+	CreateAt int64  `json:"create_at"`
+	ModifyAt int64  `json:"modify_at"`
+}
+
+func (Json) TableName() string {
+	return "json"
+}
+
 // Share
 type Share struct {
 	ID       int64  `json:"id"`
@@ -201,6 +215,8 @@ func createData(ctx *gin.Context) {
 		value, err = bindBookmark(ctx)
 	case "code":
 		value, err = bindCode(ctx)
+	case "json":
+		value, err = bindJson(ctx)
 	}
 	if err != nil {
 		ginHelper.Failure(ctx, -1, err.Error())
@@ -225,6 +241,14 @@ func createData(ctx *gin.Context) {
 	} else {
 		ginHelper.Success(ctx, value)
 	}
+}
+
+func bindJson(ctx *gin.Context) (*Json, error) {
+	data := &Json{}
+	if err := ctx.ShouldBindJSON(data); err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func bindCode(ctx *gin.Context) (*Code, error) {
@@ -275,7 +299,11 @@ func queryData(ctx *gin.Context) {
 	if user := getCurrentUser(ctx); user != nil {
 		query["username"] = user.Name
 	}
-	globalDB.Table(getTable(ctx)).Where(query).Order("id desc").Find(&list)
+	field := ctx.Request.Header.Get("X-Select-Field")
+	if len(field) < 1 {
+		field = "*"
+	}
+	globalDB.Table(getTable(ctx)).Select(field).Where(query).Order("id desc").Find(&list)
 	ginHelper.Success(ctx, list)
 }
 

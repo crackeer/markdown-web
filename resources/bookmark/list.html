@@ -37,7 +37,7 @@
         <div :id="item.category">
             <div class="card" style="margin-top: 15px;">
                 <div class="card-header" :id="item.category" style="font-size: 16px;">
-                    <strong>{{item.category}}({{item.list.length}})</strong>
+                    <strong>{{item.category}} <span class="badge bg-secondary">{{item.list.length}}</span></strong>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -55,14 +55,14 @@
     </template>
 
     <template v-for="item in list" v-if="mode == 'edit'">
-        <div class="card panel-default">
+        <div class="card panel-default" style="margin-bottom: 10px;">
             <div class="card-header" style="font-size: 16px;">
-                <strong>{{item.category}} · {{item.list.length}}</strong>
+                <strong>{{item.category}} <span class="badge bg-secondary">{{item.list.length}}</span></strong>
             </div>
             <div class="card-body">
                 <div class="btn-group pb-1" role="group">
-                    <button type="button" class="btn btn-primary" @click="selectAll(item)">全选</button>
-                    <button type="button" class="btn btn-primary" @click="deselectAll(item)">全不选</button>
+                    <button type="button" class="btn btn-primary btn-sm" @click="selectAll(item)">全选</button>
+                    <button type="button" class="btn btn-primary btn-sm" @click="deselectAll(item)">全不选</button>
                 </div>
                 <template v-for="item2 in item.list">
 
