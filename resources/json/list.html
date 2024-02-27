@@ -1,0 +1,112 @@
+<html lang="en">
+
+<head>
+    <title>JSON</title>
+    <script src="/framework.js"></script>
+</head>
+
+<body></body>
+
+<template id="template">
+    <a class="btn btn-primary" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
+        aria-controls="offcanvasExample">
+        选择JSON
+    </a>
+    <a>Load JSIN</a>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasExampleLabel">JSON数据</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="list-group">
+                <template v-for="item in list">
+                    <li class="list-group-item">An item</li>
+                </template>
+            </ul>
+        </div>
+    </div>
+
+</template>
+<script defer>
+    window.VueObject = {
+        data() {
+            return {
+                json_id: 0,
+                title: 'Edit',
+                content: '',
+                list: [],
+            }
+        },
+        template: '#template',
+        async mounted() {
+            this.getList()
+        },
+        methods: {
+            async getList() {
+                let url = "/query/json"
+                let result = await axios.get(url)
+                let list = result.data.data
+                this.list = groupBookmarkList
+            },
+            async doDelete(id) {
+                let result = await axios.post('/delete/json/' + id)
+                if (result.data.code < 0) {
+                    bootbox.alert(result.data.message)
+                } else {
+                    this.getList()
+                }
+            },
+            
+            setMode(mode) {
+                this.mode = mode
+                this.selectIds = []
+            },
+            async loadJSON() {
+                let result = await window.showOpenFilePicker();
+                if (result.length < 1) {
+                    return
+                }
+                let content = await result[0].getFile();
+                const buffer = await content.arrayBuffer();
+                let decoder = new TextDecoder("utf-8");
+                let htmlContent = decoder.decode(buffer)
+                alert(htmlContent)
+            },
+            async doUpdateBookmark() {
+                if (this.edit) {
+                    let updateData = {
+                        'title': this.title,
+                        'link': this.link,
+                        'category': this.category,
+                    }
+
+                    let result = await axios.post('/modify/bookmark/' + this.bookmark_id, updateData)
+                    if (result.data.code < 0) {
+                        bootbox.alert(result.data.message)
+                    } else {
+                        $('#myModal').modal('hide')
+                        this.getList()
+                    }
+
+                    return
+                }
+                let insertData = {
+                    'title': this.title,
+                    'link': this.link,
+                    'category': this.category,
+                }
+                let result = await axios.post('/create/bookmark', insertData)
+                if (result.data.code < 0) {
+                    alert(result.data.message)
+                }
+
+                windowReload()
+            }
+        }
+    }
+
+</script>
+
+</html>
